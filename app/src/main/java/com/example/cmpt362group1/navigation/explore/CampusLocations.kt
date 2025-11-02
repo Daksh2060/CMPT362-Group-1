@@ -1,4 +1,4 @@
-package com.example.cmpt362group1
+package com.example.cmpt362group1.navigation.explore
 
 import com.google.android.gms.maps.model.LatLng
 

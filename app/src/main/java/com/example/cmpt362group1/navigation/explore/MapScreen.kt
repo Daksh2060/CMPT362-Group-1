@@ -1,4 +1,4 @@
-package com.example.cmpt362group1
+package com.example.cmpt362group1.navigation.explore
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect

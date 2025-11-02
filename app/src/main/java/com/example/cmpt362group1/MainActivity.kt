@@ -3,28 +3,22 @@ package com.example.cmpt362group1
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.google.android.gms.maps.model.LatLng
-
+import androidx.compose.ui.unit.dp
+import com.example.cmpt362group1.navigation.BottomNavigationBar
+import com.example.cmpt362group1.navigation.explore.MapStateHolder
+import com.example.cmpt362group1.navigation.planner.PlannerScreen
+import com.example.cmpt362group1.navigation.profile.ProfileScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    MapStateHolder()
+                    MainScreen()
                 }
             }
         }
@@ -32,30 +26,30 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MapStateHolder() {
-    val sfuLocations = listOf(
-        CampusLocation("Burnaby", LatLng(49.2781, -122.9197)),
-        CampusLocation("Surrey", LatLng(49.1866, -122.8480)),
-        CampusLocation("Vancouver", LatLng(49.2847, -123.1118))
-    )
+fun MainScreen() {
+    var selectedTab by remember { mutableStateOf("Explore") }
 
-    val cityNames = sfuLocations.map { it.name }
-    val initialLocation = sfuLocations.first()
-    var selectedLocation by remember { mutableStateOf(initialLocation) }
+    Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.weight(1f)) {
+            when (selectedTab) {
+                "Explore" -> MapStateHolder()
+                "Planner" -> PlannerScreen()
+                "Profile" -> ProfileScreen()
+            }
+        }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        MapScreen(
-            selectedLocation = selectedLocation,
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        Segment(
-            items = cityNames,
-            initialSelectedItem = cityNames.first(),
-            onItemSelected = { newCityName ->
-                selectedLocation = sfuLocations.first { it.name == newCityName }
-            },
+        BottomNavigationBar(
+            currentScreen = selectedTab,
+            onTabSelected = { selectedTab = it },
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+
+@Composable
+fun PlaceholderScreen(label: String) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+        Text(label, style = MaterialTheme.typography.headlineMedium)
     }
 }
