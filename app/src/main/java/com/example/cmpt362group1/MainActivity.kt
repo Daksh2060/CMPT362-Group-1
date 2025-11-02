@@ -45,11 +45,3 @@ fun MainScreen() {
         )
     }
 }
-
-
-@Composable
-fun PlaceholderScreen(label: String) {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
-        Text(label, style = MaterialTheme.typography.headlineMedium)
-    }
-}
