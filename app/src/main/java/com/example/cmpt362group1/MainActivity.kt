@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.cmpt362group1.event.CreateEvent
 import com.example.cmpt362group1.event.Fab
 import com.example.cmpt362group1.navigation.BottomNavigationBar
 import com.example.cmpt362group1.navigation.explore.MapStateHolder
@@ -32,6 +33,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen() {
     var selectedTab by remember { mutableStateOf("Explore") }
+    var isCreatingEvent by remember { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -45,7 +47,7 @@ fun MainScreen() {
             Fab(
                 label = "Create Event",
                 icon = Icons.Default.Add,
-                onClick = {},
+                onClick = { isCreatingEvent = true },
             )
         }
     ) { innerPadding ->
@@ -59,5 +61,11 @@ fun MainScreen() {
                 "Profile" -> ProfileScreen()
             }
         }
+    }
+
+    if (isCreatingEvent) {
+        CreateEvent(
+            onExit = { isCreatingEvent = false }
+        )
     }
 }
