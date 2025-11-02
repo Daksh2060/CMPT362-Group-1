@@ -4,9 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.cmpt362group1.event.Fab
 import com.example.cmpt362group1.navigation.BottomNavigationBar
 import com.example.cmpt362group1.navigation.explore.MapStateHolder
 import com.example.cmpt362group1.navigation.planner.PlannerScreen
@@ -28,19 +33,31 @@ class MainActivity : ComponentActivity() {
 fun MainScreen() {
     var selectedTab by remember { mutableStateOf("Explore") }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.weight(1f)) {
+    Scaffold(
+        bottomBar = {
+            BottomNavigationBar(
+                currentScreen = selectedTab,
+                onTabSelected = { selectedTab = it }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.Start,
+        floatingActionButton = {
+            Fab(
+                label = "Create Event",
+                icon = Icons.Default.Add,
+                onClick = {},
+            )
+        }
+    ) { innerPadding ->
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+        ) {
             when (selectedTab) {
                 "Explore" -> MapStateHolder()
                 "Planner" -> PlannerScreen()
                 "Profile" -> ProfileScreen()
             }
         }
-
-        BottomNavigationBar(
-            currentScreen = selectedTab,
-            onTabSelected = { selectedTab = it },
-            modifier = Modifier.fillMaxWidth()
-        )
     }
 }
