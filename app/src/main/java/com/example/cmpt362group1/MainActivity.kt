@@ -3,18 +3,44 @@ package com.example.cmpt362group1
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.cmpt362group1.ui.theme.CMPT362Group1Theme
-
+import com.example.cmpt362group1.navigation.BottomNavigationBar
+import com.example.cmpt362group1.navigation.explore.MapStateHolder
+import com.example.cmpt362group1.navigation.planner.PlannerScreen
+import com.example.cmpt362group1.navigation.profile.ProfileScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContent {
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    MainScreen()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MainScreen() {
+    var selectedTab by remember { mutableStateOf("Explore") }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.weight(1f)) {
+            when (selectedTab) {
+                "Explore" -> MapStateHolder()
+                "Planner" -> PlannerScreen()
+                "Profile" -> ProfileScreen()
+            }
+        }
+
+        BottomNavigationBar(
+            currentScreen = selectedTab,
+            onTabSelected = { selectedTab = it },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
