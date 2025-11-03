@@ -10,6 +10,8 @@ class EventViewModel : ViewModel() {
     var formData by mutableStateOf(Event())
         private set
 
+    var events = mutableStateOf(mutableListOf(Event()))
+
     fun updateTitle(value: String) {
         formData = formData.copy(title = value)
     }
@@ -47,8 +49,9 @@ class EventViewModel : ViewModel() {
     }
 
     fun saveEvent() {
-        // TODO: connect firebase etc.
-        Log.d("INFO", formData.toString())
+        Log.d("INFO", "Saving ${formData}")
+        events.value.add(formData)
+        Log.d("INFO", "Saving ${events.value}")
     }
 
     fun resetForm() {

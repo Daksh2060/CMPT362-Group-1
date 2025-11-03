@@ -23,13 +23,6 @@ fun CreateEvent(
         viewModel.resetForm()
     }
 
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(
-            LatLng(49.25, -123.0),
-            13f
-        )
-    }
-
     var step by remember { mutableStateOf(STATE_FORM) }
     when (step) {
         STATE_FORM ->  {
@@ -44,7 +37,6 @@ fun CreateEvent(
 
         STATE_LOCATION -> {
             CreateEventLocation(
-                cameraPositionState,
                 onBack = { step = STATE_FORM },
                 onConfirm = { lat, lng ->
                     viewModel.updateCoordinates(lat, lng)

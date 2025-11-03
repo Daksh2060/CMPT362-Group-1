@@ -1,5 +1,6 @@
 package com.example.cmpt362group1.event
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,7 +38,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateEventLocation(
-    cameraPositionState: CameraPositionState,
     onBack: () -> Unit,
     onConfirm: (Double, Double) -> Unit,
     viewModel: EventViewModel,
@@ -84,7 +85,6 @@ fun CreateEventLocation(
                     .weight(1f)
             ) {
                 LocationPicker(
-                    cameraPositionState,
                     modifier = Modifier.fillMaxSize(),
                     selectedLocation = LatLng(selectedLat, selectedLng),
                     onLocationSelected = { latLng ->
@@ -99,7 +99,6 @@ fun CreateEventLocation(
 
 @Composable
 fun LocationPicker(
-    cameraPositionState: CameraPositionState,
     modifier: Modifier = Modifier,
     selectedLocation: LatLng,
     onLocationSelected: (LatLng) -> Unit
@@ -109,10 +108,19 @@ fun LocationPicker(
         LatLng(49.35, -122.8)
     )
 
-    val mapProperties = MapProperties(
-        latLngBoundsForCameraTarget = restrictedBounds,
-        minZoomPreference = 10.0f
-    )
+    val mapProperties = remember {
+        MapProperties(
+            latLngBoundsForCameraTarget = restrictedBounds,
+            minZoomPreference = 10.0f
+        )
+    }
+
+    val cameraPositionState = rememberCameraPositionState {
+        position = CameraPosition.fromLatLngZoom(
+            LatLng(49.25, -123.0),
+            13f
+        )
+    }
 
     GoogleMap(
         modifier = modifier,

@@ -2,6 +2,7 @@ package com.example.cmpt362group1.navigation.explore
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -38,10 +39,12 @@ fun MapScreen(
         }
     }
 
-    val mapProperties = MapProperties(
-        latLngBoundsForCameraTarget = restrictedBounds,
-        minZoomPreference = 10.0f
-    )
+    val mapProperties = remember {
+        MapProperties(
+            latLngBoundsForCameraTarget = restrictedBounds,
+            minZoomPreference = 10.0f
+        )
+    }
 
     GoogleMap(
         modifier = modifier,
