@@ -6,7 +6,7 @@ data class WeatherResponse(
 )
 
 data class CurrentWeather(
-    val temperature_2m: Double,
+    val temperature: Double,
     val weathercode: Int,
     val time: String
 )
@@ -16,4 +16,3 @@ data class HourlyWeather(
     val temperature_2m: List<Double>,
     val weathercode: List<Int>
 )
-

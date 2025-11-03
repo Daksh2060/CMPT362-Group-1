@@ -10,6 +10,7 @@ interface WeatherApi {
         @Query("latitude") latitude: Double,
         @Query("longitude") longitude: Double,
         @Query("hourly") hourly: String = "temperature_2m,weathercode",
+        @Query("timezone") timezone: String = "auto",
         @Query("current_weather") current: Boolean = false
     ): Call<WeatherResponse>
 }
