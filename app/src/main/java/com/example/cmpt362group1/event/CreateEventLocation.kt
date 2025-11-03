@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
@@ -35,6 +36,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateEventLocation(
+    cameraPositionState: CameraPositionState,
     onBack: () -> Unit,
     onConfirm: (Double, Double) -> Unit,
     viewModel: EventViewModel,
@@ -82,6 +84,7 @@ fun CreateEventLocation(
                     .weight(1f)
             ) {
                 LocationPicker(
+                    cameraPositionState,
                     modifier = Modifier.fillMaxSize(),
                     selectedLocation = LatLng(selectedLat, selectedLng),
                     onLocationSelected = { latLng ->
@@ -96,6 +99,7 @@ fun CreateEventLocation(
 
 @Composable
 fun LocationPicker(
+    cameraPositionState: CameraPositionState,
     modifier: Modifier = Modifier,
     selectedLocation: LatLng,
     onLocationSelected: (LatLng) -> Unit
@@ -109,10 +113,6 @@ fun LocationPicker(
         latLngBoundsForCameraTarget = restrictedBounds,
         minZoomPreference = 10.0f
     )
-
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(selectedLocation, 13f)
-    }
 
     GoogleMap(
         modifier = modifier,
