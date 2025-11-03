@@ -10,7 +10,8 @@ class EventViewModel : ViewModel() {
     var formData by mutableStateOf(Event())
         private set
 
-    var events = mutableStateOf(mutableListOf(Event()))
+    var events = mutableStateOf<List<Event>>(emptyList())
+        private set
 
     fun updateTitle(value: String) {
         formData = formData.copy(title = value)
@@ -50,8 +51,12 @@ class EventViewModel : ViewModel() {
 
     fun saveEvent() {
         Log.d("INFO", "Saving ${formData}")
-        events.value.add(formData)
+        events.value = events.value + formData
         Log.d("INFO", "Saving ${events.value}")
+    }
+
+    fun getEvents(): List<Event> {
+        return events.value
     }
 
     fun resetForm() {

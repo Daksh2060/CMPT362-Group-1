@@ -29,6 +29,8 @@ import com.example.cmpt362group1.navigation.planner.PlannerScreen
 import com.example.cmpt362group1.navigation.profile.ProfileScreen
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cmpt362group1.event.EventViewModel
 
 @Composable
 fun NavigationBar(currentRoute: String, navController: NavHostController) {
@@ -63,6 +65,7 @@ fun FloatingActionButton(currentRoute: String, navController: NavHostController)
 
 @Composable
 fun MainScreen(
+    eventViewModel: EventViewModel = viewModel(),
     navController: NavHostController = rememberNavController()
 ) {
     val defaultRoute: String = Route.Explore.route
@@ -86,7 +89,7 @@ fun MainScreen(
                 navController = navController,
                 startDestination = defaultRoute,
             ) {
-                composable(Route.Explore.route) { MapStateHolder() }
+                composable(Route.Explore.route) { MapStateHolder(eventViewModel) }
 
                 composable(Route.Planner.route) { PlannerScreen() }
 
@@ -96,7 +99,8 @@ fun MainScreen(
                     CreateEvent(
                         onExit = {
                             navController.popBackStack()
-                        }
+                        },
+                        eventViewModel
                     )
                 }
             }

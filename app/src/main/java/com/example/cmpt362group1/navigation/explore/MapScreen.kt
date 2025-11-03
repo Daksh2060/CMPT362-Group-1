@@ -5,18 +5,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import com.example.cmpt362group1.event.Event
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
 
 @Composable
 fun MapScreen(
     selectedLocation: CampusLocation,
+    events: List<Event> = emptyList(),
     modifier: Modifier,
 ) {
     val restrictedBounds = LatLngBounds(
@@ -51,5 +55,16 @@ fun MapScreen(
         cameraPositionState = cameraPositionState,
         properties = mapProperties
     ) {
+        events.forEach { event ->
+            if (event.latitude != null && event.longitude != null) {
+                Marker(
+                    state = MarkerState(
+                        position = LatLng(event.latitude, event.longitude)
+                    ),
+                    title = event.title,
+                    snippet = event.location,
+                )
+            }
+        }
     }
 }
