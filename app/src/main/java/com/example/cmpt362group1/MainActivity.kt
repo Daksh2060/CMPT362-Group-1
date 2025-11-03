@@ -13,6 +13,7 @@ import com.example.cmpt362group1.event.CreateEvent
 import com.example.cmpt362group1.event.Fab
 import com.example.cmpt362group1.navigation.BottomNavigationBar
 import com.example.cmpt362group1.navigation.explore.MapStateHolder
+import com.example.cmpt362group1.navigation.planner.PlannerHost
 import com.example.cmpt362group1.navigation.planner.PlannerScreen
 import com.example.cmpt362group1.navigation.profile.ProfileScreen
 class MainActivity : ComponentActivity() {
@@ -55,7 +56,7 @@ fun MainScreen() {
         ) {
             when (selectedTab) {
                 "Explore" -> MapStateHolder()
-                "Planner" -> PlannerScreen()
+                "Planner" -> PlannerHost()
                 "Profile" -> ProfileScreen()
             }
         }
