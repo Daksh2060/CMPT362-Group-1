@@ -14,7 +14,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 @Composable
 fun CreateEvent(
     onExit: () -> Unit,
-    viewModel: EventViewModel = viewModel()
+    viewModel: EventViewModel
 ) {
     val STATE_FORM          = 0
     val STATE_LOCATION      = 1

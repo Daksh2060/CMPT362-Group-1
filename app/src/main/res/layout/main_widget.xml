@@ -1,19 +1,10 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/Widget.CMPT362Group1.AppWidget.Container"
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_text"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/Theme.CMPT362Group1.AppWidgetContainer">
-
-    <TextView
-        android:id="@+id/appwidget_text"
-        style="@style/Widget.CMPT362Group1.AppWidget.InnerView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:layout_margin="8dp"
-        android:contentDescription="@string/appwidget_text"
-        android:text="@string/appwidget_text"
-        android:textSize="24sp"
-        android:textStyle="bold|italic" />
-</RelativeLayout>
+    android:background="#FFFFFF"
+    android:padding="16dp"
+    android:text="Loading..."
+    android:textColor="#000000"
+    android:textSize="14sp" />
