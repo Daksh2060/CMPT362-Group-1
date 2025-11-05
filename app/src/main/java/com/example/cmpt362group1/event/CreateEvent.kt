@@ -14,20 +14,13 @@ import com.google.maps.android.compose.rememberCameraPositionState
 @Composable
 fun CreateEvent(
     onExit: () -> Unit,
-    viewModel: EventViewModel = viewModel()
+    viewModel: EventViewModel
 ) {
     val STATE_FORM          = 0
     val STATE_LOCATION      = 1
 
     LaunchedEffect(Unit) { // we need this otherwise the vm data will persist!
         viewModel.resetForm()
-    }
-
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(
-            LatLng(49.25, -123.0),
-            13f
-        )
     }
 
     var step by remember { mutableStateOf(STATE_FORM) }
@@ -44,7 +37,6 @@ fun CreateEvent(
 
         STATE_LOCATION -> {
             CreateEventLocation(
-                cameraPositionState,
                 onBack = { step = STATE_FORM },
                 onConfirm = { lat, lng ->
                     viewModel.updateCoordinates(lat, lng)
