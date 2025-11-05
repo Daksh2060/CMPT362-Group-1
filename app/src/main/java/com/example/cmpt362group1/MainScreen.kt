@@ -1,8 +1,6 @@
 package com.example.cmpt362group1
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,9 +10,6 @@ import androidx.compose.material3.FabPosition
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -27,8 +22,6 @@ import com.example.cmpt362group1.navigation.BottomNavigationBar
 import com.example.cmpt362group1.navigation.explore.MapStateHolder
 import com.example.cmpt362group1.navigation.planner.PlannerScreen
 import com.example.cmpt362group1.navigation.profile.ProfileScreen
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cmpt362group1.event.EventViewModel
 

@@ -6,26 +6,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun CreateEvent(
     onExit: () -> Unit,
     viewModel: EventViewModel
 ) {
-    val STATE_FORM          = 0
-    val STATE_LOCATION      = 1
+    val STATE_FORM = 0
+    val STATE_LOCATION = 1
 
-    LaunchedEffect(Unit) { // we need this otherwise the vm data will persist!
+    // Used to reset VM data
+    LaunchedEffect(Unit) {
         viewModel.resetForm()
     }
 
     var step by remember { mutableStateOf(STATE_FORM) }
     when (step) {
-        STATE_FORM ->  {
+        STATE_FORM -> {
             CreateEventDetails(
                 onExit = onExit,
                 onContinue = {
@@ -42,8 +39,7 @@ fun CreateEvent(
                     viewModel.updateCoordinates(lat, lng)
                     viewModel.saveEvent()
                     onExit()
-                },
-                viewModel
+                }, viewModel
             )
         }
     }

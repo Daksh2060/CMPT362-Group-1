@@ -6,7 +6,6 @@ package com.example.cmpt362group1.event
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -77,7 +76,7 @@ class EventViewModel(private val context: Context) : ViewModel() {
         _loadEvents()
     }
 
-    // events below are temporary, since we don't have a backend/database yet
+    // Events below are temporary, since we don't have a backend/database yet
     private fun _saveEvents() {
         val prefs = context.getSharedPreferences("events", Context.MODE_PRIVATE)
         val json = JSONArray()
