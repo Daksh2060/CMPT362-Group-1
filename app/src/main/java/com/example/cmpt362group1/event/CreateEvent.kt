@@ -7,11 +7,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun CreateEvent(
     onExit: () -> Unit,
-    viewModel: EventViewModel = viewModel()
+    viewModel: EventViewModel
 ) {
     val STATE_FORM          = 0
     val STATE_LOCATION      = 1

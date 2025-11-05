@@ -45,6 +45,7 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+        viewBinding = true
     }
 }
 
@@ -76,4 +77,8 @@ dependencies {
     implementation("com.google.maps.android:maps-compose:2.1.0")
 
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-}}
+
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+}
+

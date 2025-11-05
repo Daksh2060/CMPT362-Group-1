@@ -1,5 +1,6 @@
 package com.example.cmpt362group1.event
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.maps.android.compose.CameraPositionState
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
@@ -105,13 +108,18 @@ fun LocationPicker(
         LatLng(49.35, -122.8)
     )
 
-    val mapProperties = MapProperties(
-        latLngBoundsForCameraTarget = restrictedBounds,
-        minZoomPreference = 10.0f
-    )
+    val mapProperties = remember {
+        MapProperties(
+            latLngBoundsForCameraTarget = restrictedBounds,
+            minZoomPreference = 10.0f
+        )
+    }
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(selectedLocation, 13f)
+        position = CameraPosition.fromLatLngZoom(
+            LatLng(49.25, -123.0),
+            13f
+        )
     }
 
     GoogleMap(

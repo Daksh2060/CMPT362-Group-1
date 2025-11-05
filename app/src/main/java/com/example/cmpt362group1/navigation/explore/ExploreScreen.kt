@@ -5,10 +5,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import com.example.cmpt362group1.event.EventViewModel
 import com.google.android.gms.maps.model.LatLng
 
 @Composable
-fun MapStateHolder() {
+fun MapStateHolder(eventViewModel: EventViewModel) {
     val sfuLocations = listOf(
         CampusLocation("Burnaby", LatLng(49.2781, -122.9197)),
         CampusLocation("Surrey", LatLng(49.1866, -122.8480)),
@@ -21,7 +22,9 @@ fun MapStateHolder() {
 
     Box(modifier = Modifier.fillMaxSize()) {
         MapScreen(
+
             selectedLocation = selectedLocation,
+            events = eventViewModel.getEvents(),
             modifier = Modifier.fillMaxWidth(),
         )
 

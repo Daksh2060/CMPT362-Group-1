@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.cmpt362group1.event.CreateEvent
+import com.example.cmpt362group1.event.EventViewModel
 import com.example.cmpt362group1.event.Fab
 import com.example.cmpt362group1.navigation.BottomNavigationBar
 import com.example.cmpt362group1.navigation.explore.MapStateHolder
@@ -19,10 +20,13 @@ import com.example.cmpt362group1.navigation.profile.ProfileScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val eventViewModel = EventViewModel(applicationContext)
+
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    MainScreen()
+                    MainScreen(eventViewModel)
                 }
             }
         }
@@ -68,3 +72,4 @@ fun MainScreen() {
         )
     }
 }
+
