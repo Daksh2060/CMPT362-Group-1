@@ -29,13 +29,13 @@ fun CreateEventDetails(
     onContinue: () -> Unit,
     viewModel: EventViewModel = viewModel(),
 ) {
-    Scaffold (
+    Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Create New Event") },
                 navigationIcon = {
                     IconButton(onClick = onExit) {
-                        Icon (
+                        Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
                         )
@@ -45,10 +45,10 @@ fun CreateEventDetails(
         },
     ) { paddingValues ->
         EventForm(
-            viewModel,
-            viewModel.formData,
-            onContinue,
-            paddingValues
+            entryVM = viewModel,
+            entry = viewModel.formData,
+            onContinue = onContinue,
+            paddingValues = paddingValues
         )
     }
 }
@@ -60,6 +60,8 @@ fun EventForm(
     onContinue: () -> Unit,
     paddingValues: PaddingValues,
 ) {
+    val weather = entryVM.weatherResult
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -92,15 +94,18 @@ fun EventForm(
                 DatePickerField(
                     label = "Start Date",
                     selectedDate = entry.startDate,
-                    onDateSelected = entryVM::updateStartDate,
-                    modifier = Modifier.weight(1.0f)
+                    onDateSelected = {
+                        entryVM.updateStartDate(it)
+                        entryVM.fetchWeatherForEvent()
+                    },
+                    modifier = Modifier.weight(1f)
                 )
 
                 DatePickerField(
                     label = "End Date",
                     selectedDate = entry.endDate,
                     onDateSelected = entryVM::updateEndDate,
-                    modifier = Modifier.weight(1.0f)
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -113,14 +118,29 @@ fun EventForm(
                 TimePickerField(
                     label = "Start Time",
                     selectedTime = entry.startTime,
-                    onTimeSelected = entryVM::updateStartTime,
-                    modifier = Modifier.weight(1.0f)
+                    onTimeSelected = {
+                        entryVM.updateStartTime(it)
+                        entryVM.fetchWeatherForEvent()
+                    },
+                    modifier = Modifier.weight(1f)
                 )
+
                 TimePickerField(
                     label = "End Time",
                     selectedTime = entry.endTime,
                     onTimeSelected = entryVM::updateEndTime,
-                    modifier = Modifier.weight(1.0f)
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        item {
+            weather?.let {
+                Text(
+                    text = "Weather: ${"%.1f".format(it.temperature)}°C, ${it.condition}",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
                 )
             }
         }
@@ -145,7 +165,10 @@ fun EventForm(
 
         item {
             Button(
-                onClick = onContinue,
+                onClick = {
+                    entryVM.fetchWeatherForEvent()
+                    onContinue()
+                },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Continue")
