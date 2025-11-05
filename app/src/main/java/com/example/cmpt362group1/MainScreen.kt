@@ -24,6 +24,7 @@ import com.example.cmpt362group1.navigation.planner.PlannerScreen
 import com.example.cmpt362group1.navigation.profile.ProfileScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cmpt362group1.event.EventViewModel
+import com.example.cmpt362group1.navigation.planner.PlannerHost
 
 @Composable
 fun NavigationBar(currentRoute: String, navController: NavHostController) {
@@ -84,7 +85,7 @@ fun MainScreen(
             ) {
                 composable(Route.Explore.route) { MapStateHolder(eventViewModel) }
 
-                composable(Route.Planner.route) { PlannerScreen() }
+                composable(Route.Planner.route) { PlannerHost() }
 
                 composable(Route.Profile.route) { ProfileScreen() }
 
