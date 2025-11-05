@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,8 +49,8 @@ fun EditProfileScreen(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // profile image in circular format
-        Image(
-            painter = painterResource(id = R.drawable.sample_profile_image),
+        Icon(
+            imageVector = Icons.Outlined.Person,
             contentDescription = "Profile Picture",
             modifier = Modifier
                 .size(120.dp)
