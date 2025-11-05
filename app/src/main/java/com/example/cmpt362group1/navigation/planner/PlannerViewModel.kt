@@ -3,7 +3,6 @@ package com.example.cmpt362group1.navigation.planner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 
 class PlannerViewModel(
     private val repo: PlannerRepository = FakePlannerRepository()

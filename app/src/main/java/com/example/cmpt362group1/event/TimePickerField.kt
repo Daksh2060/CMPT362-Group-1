@@ -39,7 +39,7 @@ fun TimePickerField(
     OutlinedTextField(
         value = selectedTime,
         label = { Text(label) },
-        onValueChange = {}, // nop
+        onValueChange = {}, // NOP
         singleLine = true,
         readOnly = true,
         modifier = modifier

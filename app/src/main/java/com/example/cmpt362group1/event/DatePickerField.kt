@@ -2,11 +2,9 @@ package com.example.cmpt362group1.event
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -20,8 +18,6 @@ import androidx.compose.ui.Modifier
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.text.ifEmpty
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,10 +32,10 @@ fun DatePickerField(
 
     OutlinedTextField(
         value = selectedDate,
-        label = { Text(label) },
+        label = { Text(label) }, //NOP
         singleLine = true,
         readOnly = true,
-        onValueChange = {}, // nop
+        onValueChange = {},
         modifier = modifier
             .clickable { showDatePicker = true }
             .fillMaxWidth(),
