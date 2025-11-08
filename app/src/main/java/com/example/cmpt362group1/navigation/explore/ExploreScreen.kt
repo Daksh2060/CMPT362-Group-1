@@ -1,11 +1,13 @@
 package com.example.cmpt362group1.navigation.explore
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.example.cmpt362group1.event.EventViewModel
+import com.example.cmpt362group1.database.Event
+import com.example.cmpt362group1.database.EventViewModel
 import com.google.android.gms.maps.model.LatLng
 
 @Composable
@@ -20,11 +22,20 @@ fun MapStateHolder(eventViewModel: EventViewModel) {
     val initialLocation = sfuLocations.first()
     var selectedLocation by remember { mutableStateOf(initialLocation) }
 
+    // we need to subscribe to the
+    val eventsState by eventViewModel.eventsState.collectAsState()
+    val events: List<Event> = when (eventsState) {
+        is EventViewModel.EventsUiState.Success ->
+            (eventsState as EventViewModel.EventsUiState.Success).events
+        else -> emptyList()
+    }
+
+    Log.d("MapStateHolder INFO", "Read events: ${events}")
+
     Box(modifier = Modifier.fillMaxSize()) {
         MapScreen(
-
             selectedLocation = selectedLocation,
-            events = eventViewModel.getEvents(),
+            events = events,
             modifier = Modifier.fillMaxWidth(),
         )
 

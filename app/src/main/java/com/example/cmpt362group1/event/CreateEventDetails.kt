@@ -21,13 +21,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cmpt362group1.database.Event
+import com.example.cmpt362group1.database.EventViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateEventDetails(
     onExit: () -> Unit,
     onContinue: () -> Unit,
-    viewModel: EventViewModel = viewModel(),
+    eventFormViewModel: EventFormViewModel = viewModel(),
 ) {
     Scaffold (
         topBar = {
@@ -45,8 +47,8 @@ fun CreateEventDetails(
         },
     ) { paddingValues ->
         EventForm(
-            viewModel,
-            viewModel.formData,
+            eventFormViewModel,
+            eventFormViewModel.formInput,
             onContinue,
             paddingValues
         )
@@ -55,7 +57,7 @@ fun CreateEventDetails(
 
 @Composable
 fun EventForm(
-    entryVM: EventViewModel,
+    eventFormViewModel: EventFormViewModel,
     entry: Event,
     onContinue: () -> Unit,
     paddingValues: PaddingValues,
@@ -71,7 +73,7 @@ fun EventForm(
         item {
             FormTextField(
                 value = entry.title,
-                onValueChange = entryVM::updateTitle,
+                onValueChange = eventFormViewModel::updateTitle,
                 label = "Event Title"
             )
         }
@@ -79,7 +81,7 @@ fun EventForm(
         item {
             FormTextField(
                 value = entry.location,
-                onValueChange = entryVM::updateLocation,
+                onValueChange = eventFormViewModel::updateLocation,
                 label = "Location"
             )
         }
@@ -92,14 +94,14 @@ fun EventForm(
                 DatePickerField(
                     label = "Start Date",
                     selectedDate = entry.startDate,
-                    onDateSelected = entryVM::updateStartDate,
+                    onDateSelected = eventFormViewModel::updateStartDate,
                     modifier = Modifier.weight(1.0f)
                 )
 
                 DatePickerField(
                     label = "End Date",
                     selectedDate = entry.endDate,
-                    onDateSelected = entryVM::updateEndDate,
+                    onDateSelected = eventFormViewModel::updateEndDate,
                     modifier = Modifier.weight(1.0f)
                 )
             }
@@ -113,13 +115,13 @@ fun EventForm(
                 TimePickerField(
                     label = "Start Time",
                     selectedTime = entry.startTime,
-                    onTimeSelected = entryVM::updateStartTime,
+                    onTimeSelected = eventFormViewModel::updateStartTime,
                     modifier = Modifier.weight(1.0f)
                 )
                 TimePickerField(
                     label = "End Time",
                     selectedTime = entry.endTime,
-                    onTimeSelected = entryVM::updateEndTime,
+                    onTimeSelected = eventFormViewModel::updateEndTime,
                     modifier = Modifier.weight(1.0f)
                 )
             }
@@ -128,7 +130,7 @@ fun EventForm(
         item {
             FormTextField(
                 value = entry.description,
-                onValueChange = entryVM::updateDescription,
+                onValueChange = eventFormViewModel::updateDescription,
                 label = "Description",
                 isSingleLine = false
             )
@@ -137,7 +139,7 @@ fun EventForm(
         item {
             FormTextField(
                 value = entry.dressCode,
-                onValueChange = entryVM::updateDressCode,
+                onValueChange = eventFormViewModel::updateDressCode,
                 label = "Dress Code",
                 isOptional = true
             )

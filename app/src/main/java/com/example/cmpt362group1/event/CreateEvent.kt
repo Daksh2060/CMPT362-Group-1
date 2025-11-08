@@ -1,24 +1,23 @@
 package com.example.cmpt362group1.event
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cmpt362group1.database.EventViewModel
 
 @Composable
 fun CreateEvent(
     onExit: () -> Unit,
-    viewModel: EventViewModel
+    eventViewModel: EventViewModel
 ) {
     val STATE_FORM = 0
     val STATE_LOCATION = 1
 
     // Used to reset VM data
-    LaunchedEffect(Unit) {
-        viewModel.resetForm()
-    }
+    val eventFormViewModel: EventFormViewModel = viewModel()
 
     var step by remember { mutableStateOf(STATE_FORM) }
     when (step) {
@@ -28,7 +27,7 @@ fun CreateEvent(
                 onContinue = {
                     step = STATE_LOCATION
                 },
-                viewModel
+                eventFormViewModel
             )
         }
 
@@ -36,10 +35,11 @@ fun CreateEvent(
             CreateEventLocation(
                 onBack = { step = STATE_FORM },
                 onConfirm = { lat, lng ->
-                    viewModel.updateCoordinates(lat, lng)
-                    viewModel.saveEvent()
+                    eventFormViewModel.updateCoordinates(lat, lng)
+                    eventViewModel.saveEvent(eventFormViewModel.formInput)
                     onExit()
-                }, viewModel
+                },
+                eventFormViewModel
             )
         }
     }

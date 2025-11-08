@@ -6,13 +6,16 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
-import com.example.cmpt362group1.event.EventViewModel
+import com.example.cmpt362group1.database.EventRepository
+import com.example.cmpt362group1.database.EventRepositoryImpl
+import com.example.cmpt362group1.database.EventViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val eventViewModel = EventViewModel(applicationContext)
+        val repository: EventRepository = EventRepositoryImpl()
+        val eventViewModel = EventViewModel(repository, applicationContext)
 
         setContent {
             MaterialTheme {

@@ -35,9 +35,9 @@ import com.google.maps.android.compose.rememberCameraPositionState
 fun CreateEventLocation(
     onBack: () -> Unit,
     onConfirm: (Double, Double) -> Unit,
-    viewModel: EventViewModel,
+    eventFormViewModel: EventFormViewModel,
 ) {
-    val initialLocation = viewModel.formData.latitude to viewModel.formData.longitude
+    val initialLocation = eventFormViewModel.formInput.latitude to eventFormViewModel.formInput.longitude
 
     var selectedLat by remember {
         mutableStateOf(initialLocation.first ?: 49.25)
