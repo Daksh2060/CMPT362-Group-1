@@ -1,6 +1,6 @@
 package com.example.cmpt362group1.navigation.planner
 
-import com.example.cmpt362group1.event.Event
+import com.example.cmpt362group1.database.Event
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime

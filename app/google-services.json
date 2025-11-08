@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "657057707753",
+    "project_id": "cmpt362-group1",
+    "storage_bucket": "cmpt362-group1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:657057707753:android:98a2cbb004db61119b6278",
+        "android_client_info": {
+          "package_name": "com.example.cmpt362group1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDdZgf-lSuyqAayJhPXcJjSyTZU2n0vxVQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

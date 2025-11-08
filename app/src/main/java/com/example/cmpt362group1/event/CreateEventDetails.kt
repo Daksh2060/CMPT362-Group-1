@@ -21,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cmpt362group1.database.Event
+import com.example.cmpt362group1.database.EventViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +48,7 @@ fun CreateEventDetails(
     ) { paddingValues ->
         EventForm(
             viewModel,
-            viewModel.formData,
+            viewModel.formInput,
             onContinue,
             paddingValues
         )

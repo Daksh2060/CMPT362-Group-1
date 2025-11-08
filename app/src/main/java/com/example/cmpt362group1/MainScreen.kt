@@ -20,10 +20,9 @@ import com.example.cmpt362group1.event.CreateEvent
 import com.example.cmpt362group1.event.Fab
 import com.example.cmpt362group1.navigation.BottomNavigationBar
 import com.example.cmpt362group1.navigation.explore.MapStateHolder
-import com.example.cmpt362group1.navigation.planner.PlannerScreen
 import com.example.cmpt362group1.navigation.profile.ProfileScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.cmpt362group1.event.EventViewModel
+import com.example.cmpt362group1.database.EventViewModel
 import com.example.cmpt362group1.navigation.planner.PlannerHost
 
 @Composable

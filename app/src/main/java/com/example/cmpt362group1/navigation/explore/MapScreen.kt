@@ -1,11 +1,12 @@
 package com.example.cmpt362group1.navigation.explore
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.example.cmpt362group1.event.Event
+import com.example.cmpt362group1.database.Event
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -49,6 +50,8 @@ fun MapScreen(
             minZoomPreference = 10.0f
         )
     }
+
+    Log.d("MapScreen INFO", "Drawing events: ${events}")
 
     GoogleMap(
         modifier = modifier,
