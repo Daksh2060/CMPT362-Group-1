@@ -22,7 +22,7 @@ fun MapStateHolder(eventViewModel: EventViewModel) {
     val initialLocation = sfuLocations.first()
     var selectedLocation by remember { mutableStateOf(initialLocation) }
 
-    // we need this to synchronize
+    // we need to subscribe to the
     val eventsState by eventViewModel.eventsState.collectAsState()
     val events: List<Event> = when (eventsState) {
         is EventViewModel.EventsUiState.Success ->

@@ -21,7 +21,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.example.cmpt362group1.database.EventViewModel
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
@@ -36,9 +35,9 @@ import com.google.maps.android.compose.rememberCameraPositionState
 fun CreateEventLocation(
     onBack: () -> Unit,
     onConfirm: (Double, Double) -> Unit,
-    viewModel: EventViewModel,
+    eventFormViewModel: EventFormViewModel,
 ) {
-    val initialLocation = viewModel.formInput.latitude to viewModel.formInput.longitude
+    val initialLocation = eventFormViewModel.formInput.latitude to eventFormViewModel.formInput.longitude
 
     var selectedLat by remember {
         mutableStateOf(initialLocation.first ?: 49.25)

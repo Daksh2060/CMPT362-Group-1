@@ -20,9 +20,6 @@ class EventViewModel(
     private val repository: EventRepository = EventRepositoryImpl(),
     private val context: Context
 ) : ViewModel() {
-    var formInput by mutableStateOf(Event())
-        private set
-
     private val _eventsState = MutableStateFlow<EventsUiState>(EventsUiState.Loading)
     val eventsState: StateFlow<EventsUiState> = _eventsState.asStateFlow()
 
@@ -34,46 +31,6 @@ class EventViewModel(
 
     init {
         loadAllEvents()
-    }
-
-    fun updateTitle(value: String) {
-        formInput = formInput.copy(title = value)
-    }
-
-    fun updateLocation(value: String) {
-        formInput = formInput.copy(location = value)
-    }
-
-    fun updateStartDate(value: String) {
-        formInput = formInput.copy(startDate = value)
-    }
-
-    fun updateEndDate(value: String) {
-        formInput = formInput.copy(endDate = value)
-    }
-
-    fun updateStartTime(value: String) {
-        formInput = formInput.copy(startTime = value)
-    }
-
-    fun updateEndTime(value: String) {
-        formInput = formInput.copy(endTime = value)
-    }
-
-    fun updateDescription(value: String) {
-        formInput = formInput.copy(description = value)
-    }
-
-    fun updateDressCode(value: String) {
-        formInput = formInput.copy(dressCode = value)
-    }
-
-    fun updateCoordinates(lat: Double, lng: Double) {
-        formInput = formInput.copy(latitude = lat, longitude = lng)
-    }
-
-    fun resetForm() {
-        formInput = Event()
     }
 
     fun loadAllEvents() {
@@ -113,13 +70,13 @@ class EventViewModel(
         }
     }
 
-    fun saveEvent() {
+    fun saveEvent(event: Event) {
         viewModelScope.launch {
             _operationState.value = OperationUiState.Loading
 
-            Log.d("EventViewModel", "Saving event: $formInput")
+            Log.d("EventViewModel", "Saving event: $event")
 
-            val result = repository.addEvent(formInput)
+            val result = repository.addEvent(event)
 
             if (result.isSuccess) {
                 val eventId = result.getOrNull()
@@ -127,8 +84,6 @@ class EventViewModel(
                 Log.d("EventViewModel", "Event saved with ID: $eventId")
 
                 updateWidget(context)
-
-                resetForm() // reset form after saving
             } else {
                 val error = result.exceptionOrNull()
                 _operationState.value = OperationUiState.Error(
