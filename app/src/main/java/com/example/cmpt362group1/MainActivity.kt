@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
+import com.example.cmpt362group1.auth.AuthViewModel
 import com.example.cmpt362group1.database.EventRepository
 import com.example.cmpt362group1.database.EventRepositoryImpl
 import com.example.cmpt362group1.database.EventViewModel
@@ -16,11 +17,12 @@ class MainActivity : ComponentActivity() {
 
         val repository: EventRepository = EventRepositoryImpl()
         val eventViewModel = EventViewModel(repository, applicationContext)
+        val authViewModel = AuthViewModel()
 
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    MainScreen(eventViewModel)
+                    AuthScreen(authViewModel, eventViewModel)
                 }
             }
         }

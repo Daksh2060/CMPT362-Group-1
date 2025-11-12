@@ -18,9 +18,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.cmpt362group1.auth.AuthViewModel
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(
+    authViewModel: AuthViewModel
+) {
     val navController = rememberNavController()
 
     NavHost(
@@ -28,7 +31,7 @@ fun ProfileScreen() {
         startDestination = "profile_view"
     ) {
         composable("profile_view") {
-            ProfileView(navController = navController)
+            ProfileView(navController = navController, authViewModel = authViewModel)
         }
         composable("edit_profile") {
             EditProfileScreen(navController = navController)
@@ -45,7 +48,10 @@ data class PastEvent(
 )
 
 @Composable
-fun ProfileView(navController: NavHostController) {
+fun ProfileView(
+    navController: NavHostController,
+    authViewModel: AuthViewModel
+) {
     // profile data
     var profileIntro by remember {
         mutableStateOf("Hello! I'm a CS student passionate about mobile development. Love attending tech events and meeting new people!")
@@ -123,6 +129,18 @@ fun ProfileView(navController: NavHostController) {
             PastEventCard(event)
             Spacer(modifier = Modifier.height(8.dp))
         }
+
+        item {
+            Button(
+                onClick = { authViewModel.signOut() },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("Sign Out")
+            }
+        }
     }
 }
 
@@ -166,8 +184,6 @@ fun PastEventCard(event: PastEvent) {
 
                 Text(
                     text = event.role,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.secondary
                 )
             }
