@@ -8,10 +8,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.cmpt362group1.database.Event
 import com.example.cmpt362group1.database.EventViewModel
+import com.example.cmpt362group1.database.UserViewModel
 import com.google.android.gms.maps.model.LatLng
 
 @Composable
-fun MapStateHolder(eventViewModel: EventViewModel) {
+fun MapStateHolder(eventViewModel: EventViewModel, userViewModel: UserViewModel) {
     val sfuLocations = listOf(
         CampusLocation("Burnaby", LatLng(49.2781, -122.9197)),
         CampusLocation("Surrey", LatLng(49.1866, -122.8480)),

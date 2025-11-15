@@ -19,10 +19,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.cmpt362group1.auth.AuthViewModel
+import com.example.cmpt362group1.database.UserViewModel
 
 @Composable
 fun ProfileScreen(
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    userViewModel: UserViewModel
 ) {
     val navController = rememberNavController()
 
@@ -139,6 +141,16 @@ fun ProfileView(
                 )
             ) {
                 Text("Sign Out")
+            }
+
+            Button(
+                onClick = { authViewModel.deleteUser({}, {}) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error
+                )
+            ) {
+                Text("DEBUG: Delete User & Sign Out")
             }
         }
     }

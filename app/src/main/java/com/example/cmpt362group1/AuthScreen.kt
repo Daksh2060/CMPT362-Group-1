@@ -12,11 +12,13 @@ import com.example.cmpt362group1.auth.AuthState
 import com.example.cmpt362group1.auth.AuthViewModel
 import com.example.cmpt362group1.auth.LoginScreen
 import com.example.cmpt362group1.database.EventViewModel
+import com.example.cmpt362group1.database.UserViewModel
 
 @Composable
 fun AuthScreen(
     authViewModel: AuthViewModel,
     eventViewModel: EventViewModel,
+    userViewModel: UserViewModel,
 ) {
     // will toggle screens depending on authentication status
     val authState by authViewModel.authState.collectAsState()
@@ -43,7 +45,7 @@ fun AuthScreen(
 
         // only show main screen once user is authenticated
         is AuthState.Authenticated -> {
-            MainScreen(authViewModel, eventViewModel)
+            MainScreen(authViewModel, eventViewModel, userViewModel)
         }
     }
 }

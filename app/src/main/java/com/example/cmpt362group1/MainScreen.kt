@@ -24,6 +24,7 @@ import com.example.cmpt362group1.navigation.profile.ProfileScreen
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cmpt362group1.auth.AuthViewModel
 import com.example.cmpt362group1.database.EventViewModel
+import com.example.cmpt362group1.database.UserViewModel
 import com.example.cmpt362group1.navigation.planner.PlannerHost
 
 @Composable
@@ -61,6 +62,7 @@ fun FloatingActionButton(currentRoute: String, navController: NavHostController)
 fun MainScreen(
     authViewModel: AuthViewModel = viewModel(),
     eventViewModel: EventViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel(),
     navController: NavHostController = rememberNavController()
 ) {
     val defaultRoute: String = Route.Explore.route
@@ -84,11 +86,11 @@ fun MainScreen(
                 navController = navController,
                 startDestination = defaultRoute,
             ) {
-                composable(Route.Explore.route) { MapStateHolder(eventViewModel) }
+                composable(Route.Explore.route) { MapStateHolder(eventViewModel, userViewModel) }
 
                 composable(Route.Planner.route) { PlannerHost() }
 
-                composable(Route.Profile.route) { ProfileScreen(authViewModel) }
+                composable(Route.Profile.route) { ProfileScreen(authViewModel, userViewModel) }
 
                 composable(Route.CreateEvent.route) {
                     CreateEvent(

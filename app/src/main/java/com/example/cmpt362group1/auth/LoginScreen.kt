@@ -24,6 +24,7 @@ fun LoginScreen(
     val context = LocalContext.current
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    Log.d("INFO LoginScreen", "At LoginScreen")
 
     // Google Sign-In configs
     val gso = remember {
@@ -41,7 +42,7 @@ fun LoginScreen(
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        Log.d("LoginScreen", "Result code: ${result.resultCode}")
+        Log.d("INFO LoginScreen", "Result: ${result}")
         if (result.resultCode == Activity.RESULT_OK) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             val account = task.getResult(ApiException::class.java)
@@ -58,7 +59,7 @@ fun LoginScreen(
                     onError = { error ->
                         isLoading = false
                         errorMessage = error
-                        Log.e("LoginScreen", "Sign in error: $error")
+                        Log.e("INFO LoginScreen", "Sign in error: $error")
                     }
                 )
             }

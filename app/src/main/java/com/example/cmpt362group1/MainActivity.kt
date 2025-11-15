@@ -10,19 +10,26 @@ import com.example.cmpt362group1.auth.AuthViewModel
 import com.example.cmpt362group1.database.EventRepository
 import com.example.cmpt362group1.database.EventRepositoryImpl
 import com.example.cmpt362group1.database.EventViewModel
+import com.example.cmpt362group1.database.UserRepository
+import com.example.cmpt362group1.database.UserRepositoryImpl
+import com.example.cmpt362group1.database.UserViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val repository: EventRepository = EventRepositoryImpl()
-        val eventViewModel = EventViewModel(repository, applicationContext)
-        val authViewModel = AuthViewModel()
+        val eventRepository: EventRepository = EventRepositoryImpl()
+        val eventViewModel = EventViewModel(eventRepository, applicationContext)
+
+        val userRepository: UserRepository = UserRepositoryImpl()
+        val userViewModel = UserViewModel(userRepository)
+
+        val authViewModel = AuthViewModel(userViewModel = userViewModel)
 
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    AuthScreen(authViewModel, eventViewModel)
+                    AuthScreen(authViewModel, eventViewModel, userViewModel)
                 }
             }
         }
