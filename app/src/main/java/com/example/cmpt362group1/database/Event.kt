@@ -11,6 +11,7 @@ data class Event(
 
     @ServerTimestamp
     val createdAt: Date? = null,
+    val createdBy: String = "",
 
     val title: String = "",
     val location: String = "",

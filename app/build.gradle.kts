@@ -64,6 +64,7 @@ dependencies {
 
     implementation("androidx.compose.foundation:foundation")
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.firebase.crashlytics.buildtools)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -89,5 +90,9 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
     implementation("com.google.firebase:firebase-firestore:26.0.2")
     implementation("com.google.firebase:firebase-analytics:23.0.0")
+    implementation("com.google.firebase:firebase-auth:24.0.1")
+    implementation("com.google.android.gms:play-services-auth:21.4.0")
+
+    implementation("io.coil-kt:coil-compose:2.7.0")
 }
 
