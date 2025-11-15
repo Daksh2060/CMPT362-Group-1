@@ -92,5 +92,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics:23.0.0")
     implementation("com.google.firebase:firebase-auth:24.0.1")
     implementation("com.google.android.gms:play-services-auth:21.4.0")
+
+    implementation("io.coil-kt:coil-compose:2.7.0")
 }
 

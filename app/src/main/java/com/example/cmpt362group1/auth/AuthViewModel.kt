@@ -2,9 +2,7 @@ package com.example.cmpt362group1.auth
 
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import com.example.cmpt362group1.database.User
 import com.example.cmpt362group1.database.UserViewModel
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
@@ -58,7 +56,7 @@ class AuthViewModel(
         }
     }
 
-    fun getUser(): FirebaseUser? = auth.currentUser
+    fun getUserId(): String? = auth.currentUser?.uid
 
     init {
         checkAuthState(auth)

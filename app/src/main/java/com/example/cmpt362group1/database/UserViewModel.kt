@@ -45,10 +45,6 @@ class UserViewModel(
             email = user.email ?: "",
             displayName = user.displayName ?: "",
             photoUrl = user.photoUrl?.toString() ?: "",
-            description = "",
-            hobby = "",
-            eventsCreated = arrayListOf(),
-            eventsJoined = arrayListOf()
         )
 
         createUser(newUser)

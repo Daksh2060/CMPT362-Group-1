@@ -1,8 +1,10 @@
 package com.example.cmpt362group1.navigation.profile
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Person
@@ -11,26 +13,40 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.cmpt362group1.database.User
+import com.example.cmpt362group1.database.UserViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditProfileScreen(navController: NavHostController) {
+fun EditProfileScreen(
+    navController: NavHostController,
+    userViewModel: UserViewModel,
+    userProfile: User
+) {
+
+    fun formatEnrollmentYearToString(year: Int?): String = year?.toString() ?: ""
+
+    fun formatDateToString(date: Date?): String {
+        return date?.let {
+            Log.d("INFO EditProfileScreen", "Format date")
+            SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(it)
+        } ?: ""
+    }
 
     // state variables for fields
-    var profileIntro by remember {
-        mutableStateOf("Hello! I'm a CS student passionate about mobile development. Love attending tech events and meeting new people!")
-    }
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var birthDate by remember { mutableStateOf("") }
-    var faculty by remember { mutableStateOf("") }
-    var occupancy by remember { mutableStateOf("") }
-    var enrollmentYear by remember { mutableStateOf("") }
-    var selectedHobby by remember { mutableStateOf("") }
+    var intro by remember { mutableStateOf(userProfile.description) }
+    var firstName by remember { mutableStateOf(userProfile.firstName) }
+    var lastName by remember { mutableStateOf(userProfile.lastName) }
+    var birthDate by remember { mutableStateOf(formatDateToString(userProfile.birthdate)) }
+    var faculty by remember { mutableStateOf(userProfile.faculty) }
+    var occupancy by remember { mutableStateOf(userProfile.occupancy) }
+    var enrollmentYear by remember { mutableStateOf(formatEnrollmentYearToString(userProfile.enrollmentYear)) }
+    var selectedHobby by remember { mutableStateOf(userProfile.hobby) }
     var showDatePicker by remember { mutableStateOf(false) }
     var expandedHobby by remember { mutableStateOf(false) }
 
@@ -67,8 +83,8 @@ fun EditProfileScreen(navController: NavHostController) {
 
         // introduction
         OutlinedTextField(
-            value = profileIntro,
-            onValueChange = { profileIntro = it },
+            value = intro,
+            onValueChange = { intro = it },
             label = { Text("Profile Introduction") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -101,7 +117,7 @@ fun EditProfileScreen(navController: NavHostController) {
         // birth date with calendar
         OutlinedTextField(
             value = birthDate,
-            onValueChange = { },
+            onValueChange = { birthDate = it },
             label = { Text("Birth Date") },
             readOnly = true,
             modifier = Modifier.fillMaxWidth(),
@@ -164,7 +180,11 @@ fun EditProfileScreen(navController: NavHostController) {
         // enrollment year
         OutlinedTextField(
             value = enrollmentYear,
-            onValueChange = { enrollmentYear = it },
+            onValueChange = { it ->
+                enrollmentYear = it.filter { it.isDigit() }
+            },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
             label = { Text("Enrollment Year") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -221,7 +241,23 @@ fun EditProfileScreen(navController: NavHostController) {
             // save Button
             Button(
                 onClick = {
-                    // TODO: Save profile data
+                    val updates = mutableMapOf<String, Any>()
+                    updates["description"] = intro
+                    updates["firstName"] = firstName
+                    updates["lastName"] = lastName
+                    updates["faculty"] = faculty
+                    updates["occupancy"] = occupancy
+                    updates["hobby"] = selectedHobby
+                    enrollmentYear.toIntOrNull()?.let { updates["enrollmentYear"] = it }
+
+                    if (birthDate.isNotBlank()) {
+                        SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                            .parse(birthDate)?.let {
+                                updates["birthdate"] = it
+                            }
+                    }
+
+                    userViewModel.updateUser(userProfile.id, updates)
                     navController.popBackStack()
                 },
                 modifier = Modifier.weight(1f)
