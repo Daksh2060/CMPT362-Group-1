@@ -80,8 +80,8 @@ fun MainScreen(
         }
     ) { innerPadding ->
         Box(modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
+            .fillMaxSize()
+            .padding(innerPadding)
         ) {
             NavHost(
                 navController = navController,
@@ -113,7 +113,7 @@ fun MainScreen(
                         eventViewModel
                     )
                 }
-                
+
                 composable("${Route.EventDetail.route}/{eventId}") { backStackEntry ->
                     val eventId = backStackEntry.arguments?.getString("eventId")
                         ?: return@composable
