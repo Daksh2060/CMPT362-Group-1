@@ -12,7 +12,11 @@ import com.example.cmpt362group1.database.UserViewModel
 import com.google.android.gms.maps.model.LatLng
 
 @Composable
-fun MapStateHolder(eventViewModel: EventViewModel, userViewModel: UserViewModel) {
+fun MapStateHolder(
+    eventViewModel: EventViewModel,
+    userViewModel: UserViewModel,
+    onEventSelected: (String) -> Unit
+) {
     val sfuLocations = listOf(
         CampusLocation("Burnaby", LatLng(49.2781, -122.9197)),
         CampusLocation("Surrey", LatLng(49.1866, -122.8480)),
@@ -23,7 +27,7 @@ fun MapStateHolder(eventViewModel: EventViewModel, userViewModel: UserViewModel)
     val initialLocation = sfuLocations.first()
     var selectedLocation by remember { mutableStateOf(initialLocation) }
 
-    // we need to subscribe to the
+    // 订阅 events
     val eventsState by eventViewModel.eventsState.collectAsState()
     val events: List<Event> = when (eventsState) {
         is EventViewModel.EventsUiState.Success ->
@@ -31,13 +35,14 @@ fun MapStateHolder(eventViewModel: EventViewModel, userViewModel: UserViewModel)
         else -> emptyList()
     }
 
-    Log.d("MapStateHolder INFO", "Read events: ${events}")
+    Log.d("MapStateHolder INFO", "Read events: $events")
 
     Box(modifier = Modifier.fillMaxSize()) {
         MapScreen(
             selectedLocation = selectedLocation,
             events = events,
             modifier = Modifier.fillMaxWidth(),
+            onEventSelected = onEventSelected
         )
 
         Segment(
@@ -50,4 +55,3 @@ fun MapStateHolder(eventViewModel: EventViewModel, userViewModel: UserViewModel)
         )
     }
 }
-

@@ -6,14 +6,19 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
-fun PlannerHost(vm: PlannerViewModel = viewModel()) {
+fun PlannerHost(
+    vm: PlannerViewModel = viewModel(),
+    onEventClick: (String) -> Unit = {},
+    onEditClick: (String) -> Unit = {},
+    onCreateClick: () -> Unit = {}
+) {
     val state by vm.uiState.collectAsState()
 
     PlannerScreen(
         uiState = state,
         onSearchChange = vm::onSearchChange,
-        onEventClick  = vm::onEventClick,
-        onEditClick   = vm::onEditClick,
-        onCreateClick = vm::onCreateClick
+        onEventClick = onEventClick,
+        onEditClick = onEditClick,
+        onCreateClick = onCreateClick
     )
 }

@@ -26,6 +26,7 @@ import com.example.cmpt362group1.auth.AuthViewModel
 import com.example.cmpt362group1.database.EventViewModel
 import com.example.cmpt362group1.database.UserViewModel
 import com.example.cmpt362group1.navigation.planner.PlannerHost
+import com.example.cmpt362group1.event.detail.EventDetailScreen
 
 @Composable
 fun NavigationBar(currentRoute: String, navController: NavHostController) {
@@ -78,26 +79,57 @@ fun MainScreen(
             FloatingActionButton(currentRoute, navController)
         }
     ) { innerPadding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(innerPadding)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
         ) {
             NavHost(
                 navController = navController,
                 startDestination = defaultRoute,
             ) {
-                composable(Route.Explore.route) { MapStateHolder(eventViewModel, userViewModel) }
+                // Explore
+                composable(Route.Explore.route) {
+                    MapStateHolder(
+                        eventViewModel = eventViewModel,
+                        userViewModel = userViewModel,
+                        onEventSelected = { id ->
+                            navController.navigate("${Route.EventDetail.route}/$id")
+                        }
+                    )
+                }
 
-                composable(Route.Planner.route) { PlannerHost() }
+                // Planner
+                composable(Route.Planner.route) {
+                    PlannerHost()
+                }
 
-                composable(Route.Profile.route) { ProfileScreen(authViewModel, userViewModel) }
+                // Profile
+                composable(Route.Profile.route) {
+                    ProfileScreen(authViewModel, userViewModel)
+                }
 
+                // Create Event
                 composable(Route.CreateEvent.route) {
                     CreateEvent(
                         onExit = {
                             navController.popBackStack()
                         },
                         eventViewModel
+                    )
+                }
+
+                // Event Detail
+                composable("${Route.EventDetail.route}/{eventId}") { backStackEntry ->
+                    val eventId = backStackEntry.arguments?.getString("eventId")
+                        ?: return@composable
+
+                    EventDetailScreen(
+                        eventId = eventId,
+                        eventViewModel = eventViewModel,
+                        userViewModel = userViewModel,
+                        authViewModel = authViewModel,
+                        onNavigateBack = { navController.navigateUp() }
                     )
                 }
             }

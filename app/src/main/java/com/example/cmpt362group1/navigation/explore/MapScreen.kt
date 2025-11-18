@@ -34,6 +34,7 @@ fun MapScreen(
     selectedLocation: CampusLocation,
     events: List<Event> = emptyList(),
     modifier: Modifier,
+    onEventSelected: (String) -> Unit
 ) {
     val context = LocalContext.current
     var selectedEvent by remember { mutableStateOf<Event?>(null) }
@@ -72,14 +73,12 @@ fun MapScreen(
 
     val markerBitmap = remember {
         try {
-
             val bitmap = android.graphics.BitmapFactory.decodeResource(
                 context.resources,
                 R.drawable.event_marker
             )
 
             if (bitmap != null) {
-
                 bitmap.scale(100, 100, false)
             } else {
                 Log.e("MapScreen", "Failed to decode PNG marker icon")
@@ -119,7 +118,8 @@ fun MapScreen(
                         weatherData = null
                         weatherError = null
 
-                        val dateTime = formatDateTimeForWeatherApi(event.startDate, event.startTime)
+                        val dateTime =
+                            formatDateTimeForWeatherApi(event.startDate, event.startTime)
                         Log.d("MapScreen", "Formatted dateTime for weather API: $dateTime")
                         if (dateTime != null) {
                             weatherRepository.getWeatherForDateTime(
@@ -128,16 +128,25 @@ fun MapScreen(
                                 dateTime = dateTime,
                                 onSuccess = { result ->
                                     weatherData = result
-                                    Log.d("MapScreen", "Weather data received: ${result.temperature}°C, ${result.condition}")
+                                    Log.d(
+                                        "MapScreen",
+                                        "Weather data received: ${result.temperature}°C, ${result.condition}"
+                                    )
                                 },
                                 onError = { error ->
                                     weatherError = error
-                                    Log.e("MapScreen", "Weather fetch error: $error for datetime: $dateTime")
+                                    Log.e(
+                                        "MapScreen",
+                                        "Weather fetch error: $error for datetime: $dateTime"
+                                    )
                                 }
                             )
                         } else {
                             weatherError = "Could not parse date/time format"
-                            Log.e("MapScreen", "Failed to format date: '${event.startDate}' time: '${event.startTime}'")
+                            Log.e(
+                                "MapScreen",
+                                "Failed to format date: '${event.startDate}' time: '${event.startTime}'"
+                            )
                         }
                         true
                     }
@@ -146,12 +155,17 @@ fun MapScreen(
         }
     }
 
+    // 弹出大白卡片
     selectedEvent?.let { event ->
         EventInfoDialog(
             event = event,
             weatherData = weatherData,
             weatherError = weatherError,
-            onDismiss = { selectedEvent = null }
+            onDismiss = { selectedEvent = null },
+            onEventPageClick = { id ->
+                onEventSelected(id)
+                selectedEvent = null
+            }
         )
     }
 }
@@ -161,7 +175,8 @@ fun EventInfoDialog(
     event: Event,
     weatherData: WeatherResult?,
     weatherError: String?,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onEventPageClick: (String) -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -185,9 +200,7 @@ fun EventInfoDialog(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 InfoRow(label = "Location", value = event.location)
-
                 InfoRow(label = "Date", value = "${event.startDate} - ${event.endDate}")
-
                 InfoRow(label = "Time", value = "${event.startTime} - ${event.endTime}")
 
                 if (event.description.isNotEmpty()) {
@@ -243,6 +256,7 @@ fun EventInfoDialog(
                             }
                         }
                     }
+
                     weatherError != null -> {
                         Column {
                             Text(
@@ -257,6 +271,7 @@ fun EventInfoDialog(
                             )
                         }
                     }
+
                     else -> {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -289,7 +304,10 @@ fun EventInfoDialog(
                     }
 
                     Button(
-                        onClick = onDismiss,
+                        onClick = {
+                            onEventPageClick(event.id)
+                            onDismiss()
+                        },
                         modifier = Modifier.weight(1f)
                     ) {
                         Text("Event Page")
@@ -319,7 +337,6 @@ fun InfoRow(label: String, value: String) {
 
 fun formatDateTimeForWeatherApi(date: String, time: String): String? {
     return try {
-        // Firestore formats:
         val inputDateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
         val inputTimeFormat = SimpleDateFormat("hh:mm a", Locale.US)
 

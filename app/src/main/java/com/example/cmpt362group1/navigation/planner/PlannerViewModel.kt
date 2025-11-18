@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 
 class PlannerViewModel(
-    private val repo: PlannerRepository = FakePlannerRepository()
+    private val repo: PlannerRepository = FirestorePlannerRepository()
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")
@@ -20,12 +20,11 @@ class PlannerViewModel(
                 else PlannerUiState.Content(sections, query.value)
             }
             .onStart { emit(PlannerUiState.Loading) }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), PlannerUiState.Loading)
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5_000),
+                PlannerUiState.Loading
+            )
 
     fun onSearchChange(q: String) { query.value = q }
-
-    //reserve for interaction
-    fun onEventClick(id: String) { /* TODO nav */ }
-    fun onEditClick(id: String)  { /* TODO nav */ }
-    fun onCreateClick()          { /* TODO nav */ }
 }

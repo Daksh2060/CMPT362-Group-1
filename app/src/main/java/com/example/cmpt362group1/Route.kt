@@ -6,4 +6,5 @@ sealed class Route(val route: String) {
     object Planner : Route("planner")
     object Profile : Route("profile")
     object CreateEvent : Route("create_event")
+    object EventDetail : Route("event_detail")
 }
