@@ -277,12 +277,23 @@ fun EventInfoDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Close button
-                Button(
-                    onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth()
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Close")
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Close")
+                    }
+
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Event Page")
+                    }
                 }
             }
         }
