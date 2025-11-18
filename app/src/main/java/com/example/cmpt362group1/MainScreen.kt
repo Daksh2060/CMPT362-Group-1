@@ -79,8 +79,7 @@ fun MainScreen(
             FloatingActionButton(currentRoute, navController)
         }
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
+        Box(modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
@@ -88,7 +87,6 @@ fun MainScreen(
                 navController = navController,
                 startDestination = defaultRoute,
             ) {
-                // Explore
                 composable(Route.Explore.route) {
                     MapStateHolder(
                         eventViewModel = eventViewModel,
@@ -99,17 +97,14 @@ fun MainScreen(
                     )
                 }
 
-                // Planner
                 composable(Route.Planner.route) {
                     PlannerHost()
                 }
 
-                // Profile
                 composable(Route.Profile.route) {
                     ProfileScreen(authViewModel, userViewModel)
                 }
 
-                // Create Event
                 composable(Route.CreateEvent.route) {
                     CreateEvent(
                         onExit = {
@@ -118,8 +113,7 @@ fun MainScreen(
                         eventViewModel
                     )
                 }
-
-                // Event Detail
+                
                 composable("${Route.EventDetail.route}/{eventId}") { backStackEntry ->
                     val eventId = backStackEntry.arguments?.getString("eventId")
                         ?: return@composable

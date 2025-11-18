@@ -27,7 +27,7 @@ fun MapStateHolder(
     val initialLocation = sfuLocations.first()
     var selectedLocation by remember { mutableStateOf(initialLocation) }
 
-    // 订阅 events
+    // we need to subscribe to the
     val eventsState by eventViewModel.eventsState.collectAsState()
     val events: List<Event> = when (eventsState) {
         is EventViewModel.EventsUiState.Success ->
@@ -35,7 +35,7 @@ fun MapStateHolder(
         else -> emptyList()
     }
 
-    Log.d("MapStateHolder INFO", "Read events: $events")
+    Log.d("MapStateHolder INFO", "Read events: ${events}")
 
     Box(modifier = Modifier.fillMaxSize()) {
         MapScreen(
