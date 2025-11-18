@@ -10,6 +10,10 @@ class EventFormViewModel() : ViewModel() {
     var formInput by mutableStateOf(Event())
         private set
 
+    fun setUserID(value: String) {
+        formInput = formInput.copy(createdBy = value)
+    }
+
     fun updateTitle(value: String) {
         formInput = formInput.copy(title = value)
     }

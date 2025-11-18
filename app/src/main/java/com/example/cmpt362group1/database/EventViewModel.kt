@@ -94,7 +94,9 @@ class EventViewModel(
             val result = repository.addEvent(event)
 
             if (result.isSuccess) {
-                val eventId = result.getOrNull()
+                val eventId = result.getOrNull()!!
+
+                onSuccess(eventId)
                 _operationState.value = OperationUiState.Success("Event saved successfully")
                 Log.d("EventViewModel", "Event saved with ID: $eventId")
 
