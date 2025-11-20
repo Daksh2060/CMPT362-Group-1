@@ -14,31 +14,55 @@ data class DaySection(
 
 data class EventWithTime(
     val event: Event,
-    val start: LocalDateTime,
-    val end: LocalDateTime?
+    val startTime: LocalTime,
+    val endTime: LocalTime
 )
 
 object EventGrouping {
-    private val DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    private val TIME = DateTimeFormatter.ofPattern("HH:mm")
+    private val DATE = DateTimeFormatter.ofPattern("MMM dd, yyyy", Locale.ENGLISH)
+    private val TIME = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH)
 
-    private fun toLdt(date: String, time: String): LocalDateTime? = try {
-        LocalDateTime.of(LocalDate.parse(date, DATE), LocalTime.parse(time, TIME))
-    } catch (_: Exception) { null }
+    private fun parseDateOrToday(raw: String): LocalDate {
+        return try {
+            if (raw.isBlank()) LocalDate.now()
+            else LocalDate.parse(raw, DATE)
+        } catch (e: Exception) {
+            LocalDate.now()
+        }
+    }
+
+    private fun parseTimeOrMidnight(raw: String): LocalTime {
+        return try {
+            if (raw.isBlank()) LocalTime.MIDNIGHT
+            else LocalTime.parse(raw, TIME)
+        } catch (e: Exception) {
+            LocalTime.MIDNIGHT
+        }
+    }
+
+    private fun toEventWithTime(event: Event): Pair<LocalDate, EventWithTime> {
+        val date = parseDateOrToday(event.startDate)
+        val start = parseTimeOrMidnight(event.startTime)
+        val end = parseTimeOrMidnight(event.endTime)
+        return date to EventWithTime(event, start, end)
+    }
 
     fun groupAndSort(events: List<Event>): List<DaySection> {
-        val mapped = events.mapNotNull { e ->
-            val start = toLdt(e.startDate, e.startTime) ?: return@mapNotNull null
-            val end = if (e.endDate.isNotBlank() && e.endTime.isNotBlank())
-                toLdt(e.endDate, e.endTime) else null
-            EventWithTime(e, start, end)
-        }
+        if (events.isEmpty()) return emptyList()
 
-        return mapped
-            .groupBy { it.start.toLocalDate() }
+        val withTimes: List<Pair<LocalDate, EventWithTime>> =
+            events.map { e -> toEventWithTime(e) }
+
+        val grouped: Map<LocalDate, List<EventWithTime>> =
+            withTimes.groupBy({ it.first }, { it.second })
+
+        return grouped
             .toSortedMap()
-            .map { (date, list) ->
-                DaySection(date, list.sortedBy { it.start.toLocalTime() })
+            .map { (date, itemsForDay) ->
+                DaySection(
+                    date = date,
+                    items = itemsForDay.sortedBy { it.startTime }
+                )
             }
     }
 

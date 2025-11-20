@@ -1,8 +1,10 @@
 package com.example.cmpt362group1.navigation.planner
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
+import java.time.LocalDate
 
 class PlannerViewModel(
     private val repo: PlannerRepository = FirestorePlannerRepository()
@@ -15,10 +17,17 @@ class PlannerViewModel(
             .debounce(150)
             .flatMapLatest { q -> repo.streamEvents(q) }
             .map { events ->
-                val sections = EventGrouping.groupAndSort(events)
+                val today = LocalDate.now()
+
+                val sections = EventGrouping
+                    .groupAndSort(events)
+                    .filter { it.date >= today }
+
                 if (sections.isEmpty()) PlannerUiState.Empty()
                 else PlannerUiState.Content(sections, query.value)
             }
+
+
             .onStart { emit(PlannerUiState.Loading) }
             .stateIn(
                 viewModelScope,

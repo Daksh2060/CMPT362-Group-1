@@ -3,23 +3,27 @@ package com.example.cmpt362group1.database
 import android.content.Context
 import android.content.Intent
 import android.util.Log
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
-import org.json.JSONArray
-import org.json.JSONObject
 
 class EventViewModel(
     private val repository: EventRepository = EventRepositoryImpl(),
     private val context: Context
 ) : ViewModel() {
+
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
+    private var commentsListener: ListenerRegistration? = null
+    private var participantsListener: ListenerRegistration? = null
+
     private val _eventsState = MutableStateFlow<EventsUiState>(EventsUiState.Loading)
     val eventsState: StateFlow<EventsUiState> = _eventsState.asStateFlow()
 
@@ -28,6 +32,13 @@ class EventViewModel(
 
     private val _operationState = MutableStateFlow<OperationUiState>(OperationUiState.Idle)
     val operationState: StateFlow<OperationUiState> = _operationState.asStateFlow()
+
+    private val _commentsState =
+        MutableStateFlow<CommentsUiState>(CommentsUiState.Loading)
+    val commentsState: StateFlow<CommentsUiState> = _commentsState.asStateFlow()
+
+    private val _participantsCount = MutableStateFlow(0)
+    val participantsCount: StateFlow<Int> = _participantsCount.asStateFlow()
 
     init {
         loadAllEvents()
@@ -39,12 +50,12 @@ class EventViewModel(
             Log.d("INFO", "LOADING EVENTS")
             repository.getAllEvents()
                 .catch { e ->
-                    Log.d("INFO","Failed to load events", e)
+                    Log.d("INFO", "Failed to load events", e)
                     _eventsState.value =
                         EventsUiState.Error(e.message ?: "Unknown error occurred")
                 }
                 .collect { events ->
-                    Log.d("INFO","Events loaded ${events}")
+                    Log.d("INFO", "Events loaded $events")
                     _eventsState.value =
                         EventsUiState.Success(events.filterNotNull())
                 }
@@ -132,6 +143,83 @@ class EventViewModel(
         context.sendBroadcast(intent)
     }
 
+    fun startComments(eventId: String) {
+        _commentsState.value = CommentsUiState.Loading
+
+        commentsListener?.remove()
+        commentsListener = db.collection("events")
+            .document(eventId)
+            .collection("comments")
+            .orderBy("createdAt", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("EventViewModel", "Error listening comments", error)
+                    _commentsState.value =
+                        CommentsUiState.Error(error.message ?: "Failed to load comments")
+                    return@addSnapshotListener
+                }
+
+                if (snapshot == null) {
+                    _commentsState.value = CommentsUiState.Success(emptyList())
+                    return@addSnapshotListener
+                }
+
+                val comments = snapshot.toObjects(Comment::class.java)
+                _commentsState.value = CommentsUiState.Success(comments)
+            }
+    }
+
+    fun postComment(
+        eventId: String,
+        userId: String,
+        userName: String,
+        text: String,
+        parentId: String? = null
+    ) {
+        val trimmed = text.trim()
+        if (trimmed.isEmpty()) return
+
+        val comment = Comment(
+            eventId = eventId,
+            userId = userId,
+            userName = userName,
+            text = trimmed,
+            parentId = parentId
+        )
+
+        db.collection("events")
+            .document(eventId)
+            .collection("comments")
+            .add(comment)
+            .addOnSuccessListener {
+                Log.d("EventViewModel", "Comment added")
+            }
+            .addOnFailureListener { e ->
+                Log.e("EventViewModel", "Failed to add comment", e)
+            }
+    }
+
+    fun startParticipants(eventId: String) {
+        participantsListener?.remove()
+        participantsListener = db.collection("users")
+            .whereArrayContains("eventsJoined", eventId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("EventViewModel", "Error listening participants", error)
+                    _participantsCount.value = 0
+                    return@addSnapshotListener
+                }
+
+                _participantsCount.value = snapshot?.size() ?: 0
+            }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        commentsListener?.remove()
+        participantsListener?.remove()
+    }
+
     sealed class EventsUiState {
         data object Loading : EventsUiState()
         data class Success(val events: List<Event>) : EventsUiState()
@@ -150,5 +238,11 @@ class EventViewModel(
         data object Loading : OperationUiState()
         data class Success(val message: String) : OperationUiState()
         data class Error(val message: String) : OperationUiState()
+    }
+
+    sealed class CommentsUiState {
+        data object Loading : CommentsUiState()
+        data class Success(val comments: List<Comment>) : CommentsUiState()
+        data class Error(val message: String) : CommentsUiState()
     }
 }

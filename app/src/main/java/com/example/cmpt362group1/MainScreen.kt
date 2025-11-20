@@ -98,8 +98,18 @@ fun MainScreen(
                 }
 
                 composable(Route.Planner.route) {
-                    PlannerHost()
+                    PlannerHost(
+                        onEventClick = { id ->
+                            navController.navigate("${Route.EventDetail.route}/$id")
+                        },
+                        onEditClick = { id ->
+                        },
+                        onCreateClick = {
+                            navController.navigate(Route.CreateEvent.route)
+                        }
+                    )
                 }
+
 
                 composable(Route.Profile.route) {
                     ProfileScreen(authViewModel, userViewModel)
