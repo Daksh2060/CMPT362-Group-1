@@ -4,5 +4,6 @@ import com.google.android.gms.maps.model.LatLng
 
 data class CampusLocation(
     val name: String,
-    val latLng: LatLng
+    val latLng: LatLng,
+    val zoom: Float
 )
