@@ -50,19 +50,16 @@ fun MapScreen(
         LatLng(49.35, -122.8)
     )
 
-    val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(selectedLocation.latLng, 12f)
-    }
+    val cameraPositionState = rememberCameraPositionState()
 
     LaunchedEffect(selectedLocation) {
-        val newPosition = CameraPosition.fromLatLngZoom(selectedLocation.latLng, 12f)
-        coroutineScope.launch {
-            cameraPositionState.animate(
-                update = CameraUpdateFactory.newCameraPosition(newPosition),
-                durationMs = 500
-            )
-        }
+        cameraPositionState.animate(
+            update = CameraUpdateFactory.newLatLngZoom(selectedLocation.latLng, selectedLocation.zoom),
+            durationMs = 500
+        )
     }
+
+
 
     val mapProperties = remember {
         MapProperties(

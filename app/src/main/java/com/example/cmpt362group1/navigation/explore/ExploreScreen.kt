@@ -25,9 +25,9 @@ import com.google.android.gms.maps.model.LatLng
 @Composable
 fun MapStateHolder(eventViewModel: EventViewModel, userViewModel: UserViewModel) {
     val sfuLocations = listOf(
-        CampusLocation("Burnaby", LatLng(49.2781, -122.9197)),
-        CampusLocation("Surrey", LatLng(49.1866, -122.8480)),
-        CampusLocation("Vancouver", LatLng(49.2847, -123.1118))
+        CampusLocation("Burnaby", LatLng(49.279161057278586, -122.91807989898375), zoom = 15f),
+        CampusLocation("Surrey", LatLng(49.18855095340025, -122.85009015452918), zoom = 17.3f),
+        CampusLocation("Vancouver", LatLng(49.284572597611565, -123.11142976880664), zoom = 19f)
     )
 
     val cityNames = sfuLocations.map { it.name }
