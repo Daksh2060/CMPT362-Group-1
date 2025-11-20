@@ -7,8 +7,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.cmpt362group1.R
 import com.example.cmpt362group1.database.Event
@@ -68,23 +71,18 @@ fun MapScreen(
         )
     }
 
-    Log.d("MapScreen INFO", "Drawing events: $events")
+
+    val futureEvents = events.filter { it.startDateTime() > Date() }
+
+    Log.d("MapScreen INFO", "Drawing future events: $futureEvents")
 
     val markerBitmap = remember {
         try {
-
             val bitmap = android.graphics.BitmapFactory.decodeResource(
                 context.resources,
                 R.drawable.event_marker
             )
-
-            if (bitmap != null) {
-
-                bitmap.scale(100, 100, false)
-            } else {
-                Log.e("MapScreen", "Failed to decode PNG marker icon")
-                null
-            }
+            bitmap?.scale(100, 100, false)
         } catch (e: Exception) {
             Log.e("MapScreen", "Error loading PNG marker icon", e)
             null
@@ -96,7 +94,7 @@ fun MapScreen(
         cameraPositionState = cameraPositionState,
         properties = mapProperties
     ) {
-        events.forEach { event ->
+        futureEvents.forEach { event ->
             if (event.latitude != null && event.longitude != null) {
                 val markerIcon = markerBitmap?.let { bitmap ->
                     try {
@@ -120,24 +118,16 @@ fun MapScreen(
                         weatherError = null
 
                         val dateTime = formatDateTimeForWeatherApi(event.startDate, event.startTime)
-                        Log.d("MapScreen", "Formatted dateTime for weather API: $dateTime")
                         if (dateTime != null) {
                             weatherRepository.getWeatherForDateTime(
                                 latitude = event.latitude,
                                 longitude = event.longitude,
                                 dateTime = dateTime,
-                                onSuccess = { result ->
-                                    weatherData = result
-                                    Log.d("MapScreen", "Weather data received: ${result.temperature}°C, ${result.condition}")
-                                },
-                                onError = { error ->
-                                    weatherError = error
-                                    Log.e("MapScreen", "Weather fetch error: $error for datetime: $dateTime")
-                                }
+                                onSuccess = { result -> weatherData = result },
+                                onError = { error -> weatherError = error }
                             )
                         } else {
                             weatherError = "Could not parse date/time format"
-                            Log.e("MapScreen", "Failed to format date: '${event.startDate}' time: '${event.startTime}'")
                         }
                         true
                     }
@@ -156,6 +146,17 @@ fun MapScreen(
     }
 }
 
+fun Event.startDateTime(): Date {
+    return try {
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.US)
+        dateFormat.parse("$startDate $startTime") ?: Date(0)
+    } catch (e: Exception) {
+        Log.e("MapScreen", "Error parsing event date/time: $startDate $startTime", e)
+        Date(0)
+    }
+}
+
+
 @Composable
 fun EventInfoDialog(
     event: Event,
@@ -168,39 +169,43 @@ fun EventInfoDialog(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White
+            ),
+            elevation = CardDefaults.cardElevation(12.dp)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(20.dp)
+                    .padding(24.dp)
             ) {
+
                 Text(
                     text = event.title,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 20.sp,
+                    color = Color.Black
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 InfoRow(label = "Location", value = event.location)
-
                 InfoRow(label = "Date", value = "${event.startDate} - ${event.endDate}")
-
                 InfoRow(label = "Time", value = "${event.startTime} - ${event.endTime}")
 
                 if (event.description.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = "Description",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp,
+                        color = Color(0xFF444444)
                     )
                     Text(
                         text = event.description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        fontSize = 15.sp,
+                        color = Color.Black
                     )
                 }
 
@@ -208,55 +213,76 @@ fun EventInfoDialog(
                     InfoRow(label = "Dress Code", value = event.dressCode)
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
-                Divider()
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+                Divider(color = Color(0xFFE0E0E0))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = "Expected Weather",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp,
+                    color = Color.Black
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
                 when {
                     weatherData != null -> {
-                        Column {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Column {
-                                    Text(
-                                        text = "${String.format("%.1f", weatherData.temperature)}°C",
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    Text(
-                                        text = weatherData.condition,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+
+                            Text(
+                                text = "${weatherData.temperature.toInt()}°C",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 24.sp,
+                                color = Color.Black
+                            )
+
+                            val symbol = when (weatherData.condition.lowercase()) {
+                                "clear sky", "mainly clear" -> "☀️"
+                                "partly cloudy" -> "⛅"
+                                "overcast" -> "☁️"
+                                "fog", "depositing rime fog" -> "🌫️"
+                                "light drizzle", "moderate drizzle", "dense drizzle",
+                                "light freezing drizzle", "dense freezing drizzle",
+                                "slight rain", "moderate rain", "heavy rain",
+                                "light freezing rain", "heavy freezing rain",
+                                "slight rain showers", "moderate rain showers", "violent rain showers" -> "🌧️"
+                                "slight snow fall", "moderate snow fall", "heavy snow fall",
+                                "snow grains", "slight snow showers", "heavy snow showers" -> "❄️"
+                                "thunderstorm", "thunderstorm with slight hail", "thunderstorm with heavy hail" -> "⛈️"
+                                else -> "🌡️"
                             }
+
+                            Text(
+                                text = symbol,
+                                fontSize = 24.sp
+                            )
+
+                            // Condition text
+                            Text(
+                                text = weatherData.condition,
+                                fontSize = 16.sp,
+                                color = Color(0xFF555555)
+                            )
                         }
                     }
+
                     weatherError != null -> {
-                        Column {
-                            Text(
-                                text = "Weather data unavailable",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                            Text(
-                                text = weatherError,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        Text(
+                            text = "Weather data unavailable",
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Red
+                        )
+                        Text(
+                            text = weatherError,
+                            fontSize = 13.sp,
+                            color = Color.Gray
+                        )
                     }
+
                     else -> {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -268,54 +294,82 @@ fun EventInfoDialog(
                             )
                             Text(
                                 text = "Loading weather...",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                fontSize = 13.sp,
+                                color = Color.Gray
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Button(
+                    ElevatedButton(
                         onClick = onDismiss,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.elevatedButtonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        ),
+                        elevation = ButtonDefaults.elevatedButtonElevation(
+                            defaultElevation = 6.dp,
+                            pressedElevation = 12.dp,
+                            focusedElevation = 8.dp,
+                            hoveredElevation = 8.dp
+                        )
                     ) {
-                        Text("Close")
+                        Text("Close", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     }
 
-                    Button(
+                    ElevatedButton(
                         onClick = onDismiss,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.elevatedButtonColors(
+                            containerColor = Color.White,
+                            contentColor = Color.Black
+                        ),
+                        elevation = ButtonDefaults.elevatedButtonElevation(
+                            defaultElevation = 6.dp,
+                            pressedElevation = 12.dp,
+                            focusedElevation = 8.dp,
+                            hoveredElevation = 8.dp
+                        )
                     ) {
-                        Text("Event Page")
+                        Text("Event Page", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
                     }
                 }
+
             }
         }
     }
 }
 
+
 @Composable
 fun InfoRow(label: String, value: String) {
     if (value.isNotEmpty()) {
         Spacer(modifier = Modifier.height(8.dp))
+
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 13.sp,
+            color = Color(0xFF555555)
         )
+
         Text(
             text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            fontSize = 15.sp,
+            color = Color.Black
         )
     }
 }
+
 
 fun formatDateTimeForWeatherApi(date: String, time: String): String? {
     return try {
