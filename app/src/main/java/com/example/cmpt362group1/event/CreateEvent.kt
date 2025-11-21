@@ -2,6 +2,7 @@ package com.example.cmpt362group1.event
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -10,14 +11,17 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cmpt362group1.auth.AuthViewModel
 import com.example.cmpt362group1.database.EventViewModel
 import com.example.cmpt362group1.database.UserViewModel
+import com.example.cmpt362group1.database.OperationUiState
 
 @Composable
 fun CreateEvent(
     onExit: () -> Unit,
     eventViewModel: EventViewModel,
     userViewModel: UserViewModel,
-    authViewModel: AuthViewModel,
+    authViewModel: AuthViewModel, // uid
 ) {
+    val uid = authViewModel.getUserId()!!
+
     val STATE_FORM = 0
     val STATE_LOCATION = 1
 
@@ -41,6 +45,8 @@ fun CreateEvent(
                 onBack = { step = STATE_FORM },
                 onConfirm = { lat, lng ->
                     eventFormViewModel.updateCoordinates(lat, lng)
+                    eventFormViewModel.setUserID(uid)
+
                     val event = eventFormViewModel.formInput
 
                     eventViewModel.saveEvent(
