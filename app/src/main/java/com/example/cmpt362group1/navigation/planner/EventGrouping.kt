@@ -69,6 +69,7 @@ object EventGrouping {
     fun niceDateHeader(d: LocalDate): String {
         val month = d.month.getDisplayName(java.time.format.TextStyle.FULL, Locale.ENGLISH)
         val day = d.dayOfMonth
+        val year = d.year
         val suffix = when {
             day in 11..13 -> "th"
             day % 10 == 1 -> "st"
@@ -76,6 +77,7 @@ object EventGrouping {
             day % 10 == 3 -> "rd"
             else -> "th"
         }
-        return "$day$suffix $month"
+        return "$month $day$suffix, $year"
     }
+
 }
