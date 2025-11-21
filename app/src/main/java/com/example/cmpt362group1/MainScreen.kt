@@ -36,6 +36,9 @@ fun NavigationBar(currentRoute: String, navController: NavHostController) {
         BottomNavigationBar(
             currentScreen = currentRoute,
             onTabSelected = { route ->
+                if (currentRoute.startsWith(Route.EventDetail.route)) {
+                    navController.popBackStack()
+                }
                 navController.navigate(route) {
                     popUpTo(Route.Explore.route) { saveState = true }
                     launchSingleTop = true
