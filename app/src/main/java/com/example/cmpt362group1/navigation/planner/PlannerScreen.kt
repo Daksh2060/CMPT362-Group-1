@@ -5,7 +5,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,9 +20,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun PlannerScreen(
     uiState: PlannerUiState = PlannerUiState.Content(emptyList()),
     onSearchChange: (String) -> Unit = {},
-    onEventClick: (String) -> Unit = {},
-    onEditClick: (String) -> Unit = {},
-    onCreateClick: () -> Unit = {}
+    onEventClick: (String) -> Unit = {}
 ) {
 
     val colors = lightColorScheme(
@@ -39,9 +36,7 @@ fun PlannerScreen(
         PlannerScreenContent(
             uiState,
             onSearchChange,
-            onEventClick,
-            onEditClick,
-            onCreateClick
+            onEventClick
         )
     }
 }
@@ -50,9 +45,7 @@ fun PlannerScreen(
 private fun PlannerScreenContent(
     uiState: PlannerUiState,
     onSearchChange: (String) -> Unit,
-    onEventClick: (String) -> Unit,
-    onEditClick: (String) -> Unit,
-    onCreateClick: () -> Unit
+    onEventClick: (String) -> Unit
 ) {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -145,8 +138,7 @@ private fun PlannerScreenContent(
                                     time = ew.startTime.toString(),
                                     createdBy = ew.event.createdBy,
                                     currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                                    onClick = { onEventClick(ew.event.id) },
-                                    onEditClick = { onEditClick(ew.event.id) }
+                                    onClick = { onEventClick(ew.event.id) }
                                 )
                                 Spacer(Modifier.height(10.dp))
                             }
@@ -167,8 +159,7 @@ private fun EventRow(
     time: String,
     createdBy: String,
     currentUserId: String,
-    onClick: () -> Unit,
-    onEditClick: () -> Unit
+    onClick: () -> Unit
 ) {
     val canEdit = createdBy == currentUserId
 
