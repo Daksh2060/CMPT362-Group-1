@@ -87,9 +87,9 @@ fun PlannerScreen(
                             EventRow(
                                 title = ew.event.title,
                                 location = ew.event.location,
-                                time = ew.start.toLocalTime().toString(),
-                                onClick = { onEventClick(ew.event.title) },
-                                onEditClick = { onEditClick(ew.event.title) }
+                                time = ew.startTime.toString(),
+                                onClick = { onEventClick(ew.event.id) },
+                                onEditClick = { onEditClick(ew.event.id) }
                             )
                             Spacer(Modifier.height(8.dp))
                         }

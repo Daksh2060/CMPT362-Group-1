@@ -23,7 +23,11 @@ import com.example.cmpt362group1.database.UserViewModel
 import com.google.android.gms.maps.model.LatLng
 
 @Composable
-fun MapStateHolder(eventViewModel: EventViewModel, userViewModel: UserViewModel) {
+fun MapStateHolder(
+    eventViewModel: EventViewModel,
+    userViewModel: UserViewModel,
+    onEventSelected: (String) -> Unit
+) {
     val sfuLocations = listOf(
         CampusLocation("Burnaby", LatLng(49.279161057278586, -122.91807989898375), zoom = 15f),
         CampusLocation("Surrey", LatLng(49.18855095340025, -122.85009015452918), zoom = 17.3f),
@@ -47,7 +51,8 @@ fun MapStateHolder(eventViewModel: EventViewModel, userViewModel: UserViewModel)
         MapScreen(
             selectedLocation = selectedLocation,
             events = events,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            onEventSelected = onEventSelected
         )
 
         SegmentFloatingBar(
@@ -121,5 +126,3 @@ fun SegmentFloatingBar(
         }
     }
 }
-
-

@@ -26,6 +26,7 @@ import com.example.cmpt362group1.auth.AuthViewModel
 import com.example.cmpt362group1.database.EventViewModel
 import com.example.cmpt362group1.database.UserViewModel
 import com.example.cmpt362group1.navigation.planner.PlannerHost
+import com.example.cmpt362group1.event.detail.EventDetailScreen
 
 @Composable
 fun NavigationBar(currentRoute: String, navController: NavHostController) {
@@ -35,6 +36,9 @@ fun NavigationBar(currentRoute: String, navController: NavHostController) {
         BottomNavigationBar(
             currentScreen = currentRoute,
             onTabSelected = { route ->
+                if (currentRoute.startsWith(Route.EventDetail.route)) {
+                    navController.popBackStack()
+                }
                 navController.navigate(route) {
                     popUpTo(Route.Explore.route) { saveState = true }
                     launchSingleTop = true
@@ -86,18 +90,55 @@ fun MainScreen(
                 navController = navController,
                 startDestination = defaultRoute,
             ) {
-                composable(Route.Explore.route) { MapStateHolder(eventViewModel, userViewModel) }
+                composable(Route.Explore.route) {
+                    MapStateHolder(
+                        eventViewModel = eventViewModel,
+                        userViewModel = userViewModel,
+                        onEventSelected = { id ->
+                            navController.navigate("${Route.EventDetail.route}/$id")
+                        }
+                    )
+                }
 
-                composable(Route.Planner.route) { PlannerHost() }
+                composable(Route.Planner.route) {
+                    PlannerHost(
+                        onEventClick = { id ->
+                            navController.navigate("${Route.EventDetail.route}/$id")
+                        },
+                        onEditClick = { id ->
+                        },
+                        onCreateClick = {
+                            navController.navigate(Route.CreateEvent.route)
+                        }
+                    )
+                }
 
-                composable(Route.Profile.route) { ProfileScreen(authViewModel, userViewModel) }
+
+                composable(Route.Profile.route) {
+                    ProfileScreen(authViewModel, userViewModel)
+                }
 
                 composable(Route.CreateEvent.route) {
                     CreateEvent(
                         onExit = {
                             navController.popBackStack()
                         },
-                        eventViewModel
+                        eventViewModel = eventViewModel,
+                        userViewModel = userViewModel,
+                        authViewModel = authViewModel,
+                    )
+                }
+
+                composable("${Route.EventDetail.route}/{eventId}") { backStackEntry ->
+                    val eventId = backStackEntry.arguments?.getString("eventId")
+                        ?: return@composable
+
+                    EventDetailScreen(
+                        eventId = eventId,
+                        eventViewModel = eventViewModel,
+                        userViewModel = userViewModel,
+                        authViewModel = authViewModel,
+                        onNavigateBack = { navController.navigateUp() }
                     )
                 }
             }

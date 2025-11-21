@@ -37,6 +37,7 @@ fun MapScreen(
     selectedLocation: CampusLocation,
     events: List<Event> = emptyList(),
     modifier: Modifier,
+    onEventSelected: (String) -> Unit
 ) {
     val context = LocalContext.current
     var selectedEvent by remember { mutableStateOf<Event?>(null) }
@@ -138,7 +139,11 @@ fun MapScreen(
             event = event,
             weatherData = weatherData,
             weatherError = weatherError,
-            onDismiss = { selectedEvent = null }
+            onDismiss = { selectedEvent = null },
+            onEventPageClick = { id ->
+                onEventSelected(id)
+                selectedEvent = null
+            }
         )
     }
 }
@@ -159,7 +164,8 @@ fun EventInfoDialog(
     event: Event,
     weatherData: WeatherResult?,
     weatherError: String?,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onEventPageClick: (String) -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -319,11 +325,18 @@ fun EventInfoDialog(
                             hoveredElevation = 8.dp
                         )
                     ) {
-                        Text("Close", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = "Close",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
 
                     ElevatedButton(
-                        onClick = onDismiss,
+                        onClick = {
+                            onEventPageClick(event.id)
+                            onDismiss()
+                        },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.elevatedButtonColors(
@@ -337,7 +350,11 @@ fun EventInfoDialog(
                             hoveredElevation = 8.dp
                         )
                     ) {
-                        Text("Event Page", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = "Event Page",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                 }
 
