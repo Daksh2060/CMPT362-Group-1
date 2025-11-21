@@ -325,11 +325,18 @@ fun EventInfoDialog(
                             hoveredElevation = 8.dp
                         )
                     ) {
-                        Text("Close", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = "Close",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
 
                     ElevatedButton(
-                        onClick = onDismiss,
+                        onClick = {
+                            onEventPageClick(event.id)
+                            onDismiss()
+                        },
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.elevatedButtonColors(
@@ -342,14 +349,12 @@ fun EventInfoDialog(
                             focusedElevation = 8.dp,
                             hoveredElevation = 8.dp
                         )
-                    Button(
-                        onClick = {
-                            onEventPageClick(event.id)
-                            onDismiss()
-                        },
-                        modifier = Modifier.weight(1f)
                     ) {
-                        Text("Event Page", fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            text = "Event Page",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
                     }
                 }
 

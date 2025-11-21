@@ -81,7 +81,11 @@ class EventViewModel(
         }
     }
 
-    fun saveEvent(event: Event) {
+    fun saveEvent(
+        event: Event,
+        onSuccess: (String) -> Unit = {},
+        onError: (Throwable?) -> Unit = {}
+    ) {
         viewModelScope.launch {
             _operationState.value = OperationUiState.Loading
 
@@ -95,11 +99,17 @@ class EventViewModel(
                 Log.d("EventViewModel", "Event saved with ID: $eventId")
 
                 updateWidget(context)
+
+                if (eventId != null) {
+                    onSuccess(eventId)
+                }
             } else {
                 val error = result.exceptionOrNull()
                 _operationState.value = OperationUiState.Error(
                     error?.message ?: "Failed to save event"
                 )
+
+                onError(error)
             }
         }
     }

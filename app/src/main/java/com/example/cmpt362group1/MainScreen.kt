@@ -120,7 +120,9 @@ fun MainScreen(
                         onExit = {
                             navController.popBackStack()
                         },
-                        eventViewModel
+                        eventViewModel = eventViewModel,
+                        userViewModel = userViewModel,
+                        authViewModel = authViewModel,
                     )
                 }
 

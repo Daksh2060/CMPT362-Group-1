@@ -18,16 +18,27 @@ class PlannerViewModel(
             .flatMapLatest { q -> repo.streamEvents(q) }
             .map { events ->
                 val today = LocalDate.now()
+                Log.d("PlannerDebug", "PlannerViewModel: today = $today")
 
-                val sections = EventGrouping
-                    .groupAndSort(events)
-                    .filter { it.date >= today }
+                val grouped = EventGrouping.groupAndSort(events)
 
-                if (sections.isEmpty()) PlannerUiState.Empty()
-                else PlannerUiState.Content(sections, query.value)
+                grouped.forEach { section ->
+                    Log.d(
+                        "PlannerDebug",
+                        "PlannerViewModel: section date = ${section.date}, size=${section.items.size}"
+                    )
+                }
+
+                val sections = grouped.filter { section ->
+                    section.date >= today
+                }
+
+                if (sections.isEmpty()) {
+                    PlannerUiState.Empty()
+                } else {
+                    PlannerUiState.Content(sections, query.value)
+                }
             }
-
-
             .onStart { emit(PlannerUiState.Loading) }
             .stateIn(
                 viewModelScope,
@@ -35,5 +46,7 @@ class PlannerViewModel(
                 PlannerUiState.Loading
             )
 
-    fun onSearchChange(q: String) { query.value = q }
+    fun onSearchChange(q: String) {
+        query.value = q
+    }
 }
