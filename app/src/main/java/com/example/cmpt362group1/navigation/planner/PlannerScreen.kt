@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
@@ -65,11 +66,26 @@ private fun PlannerScreenContent(
                     Text("Find Your Events", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 },
                 trailingIcon = {
-                    Icon(
-                        Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (text.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                text = ""
+                                onSearchChange("")
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Clear search",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 },
                 shape = MaterialTheme.shapes.medium,
                 colors = OutlinedTextFieldDefaults.colors(
