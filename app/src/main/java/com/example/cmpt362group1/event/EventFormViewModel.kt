@@ -1,5 +1,6 @@
 package com.example.cmpt362group1.event
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -8,6 +9,9 @@ import com.example.cmpt362group1.database.Event
 
 class EventFormViewModel() : ViewModel() {
     var formInput by mutableStateOf(Event())
+        private set
+
+    var imageUri: Uri? by mutableStateOf(null)
         private set
 
     fun setUserID(value: String) {
@@ -48,6 +52,14 @@ class EventFormViewModel() : ViewModel() {
 
     fun updateCoordinates(lat: Double, lng: Double) {
         formInput = formInput.copy(latitude = lat, longitude = lng)
+    }
+
+    fun updateImageUrl(url: String) {
+        formInput = formInput.copy(imageUrl = url)
+    }
+
+    fun updateImageUri(uri: Uri?) {
+        imageUri = uri
     }
 
     fun resetForm() {

@@ -22,5 +22,6 @@ data class Event(
     val description: String = "",
     val dressCode: String = "",
     val latitude: Double? = null,
-    val longitude: Double? = null
+    val longitude: Double? = null,
+    val imageUrl: String = "",
 )
