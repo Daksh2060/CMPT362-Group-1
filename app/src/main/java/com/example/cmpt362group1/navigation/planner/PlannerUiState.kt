@@ -6,6 +6,6 @@ sealed interface PlannerUiState {
         val sections: List<DaySection>,
         val query: String = ""
     ) : PlannerUiState
-    data class Empty(val hint: String = "No events yet") : PlannerUiState
+    data class Empty(val hint: String = "No Events Found...") : PlannerUiState
     data class Error(val message: String) : PlannerUiState
 }

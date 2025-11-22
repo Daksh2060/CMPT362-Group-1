@@ -54,7 +54,11 @@ private fun PlannerScreenContent(
             val q = (uiState as? PlannerUiState.Content)?.query.orEmpty()
             var text by rememberSaveable { mutableStateOf(q) }
 
-            LaunchedEffect(q) { if (q != text) text = q }
+            if (uiState is PlannerUiState.Content) {
+                LaunchedEffect(uiState.query) {
+                    text = uiState.query
+                }
+            }
 
             OutlinedTextField(
                 value = text,
@@ -63,16 +67,17 @@ private fun PlannerScreenContent(
                     onSearchChange(it)
                 },
                 placeholder = {
-                    Text("Find Your Events", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "Find Your Events",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 },
                 trailingIcon = {
                     if (text.isNotEmpty()) {
-                        IconButton(
-                            onClick = {
-                                text = ""
-                                onSearchChange("")
-                            }
-                        ) {
+                        IconButton(onClick = {
+                            text = ""
+                            onSearchChange("")
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Clear search",
@@ -106,6 +111,7 @@ private fun PlannerScreenContent(
         }
     ) { inner ->
         Box(Modifier.padding(inner)) {
+
             when (uiState) {
 
                 PlannerUiState.Loading ->
@@ -114,13 +120,38 @@ private fun PlannerScreenContent(
                         color = MaterialTheme.colorScheme.primary
                     )
 
-                is PlannerUiState.Empty ->
-                    Text(
-                        text = uiState.hint,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                is PlannerUiState.Empty -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                            modifier = Modifier.size(60.dp)
+                        )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        Text(
+                            text = uiState.hint,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        Spacer(Modifier.height(8.dp))
+
+                        Text(
+                            text = "Try adjusting your search or adding new events.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
                 is PlannerUiState.Error ->
                     Text(
@@ -134,7 +165,6 @@ private fun PlannerScreenContent(
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(16.dp)
                     ) {
-
                         uiState.sections.forEach { section ->
                             item {
                                 Text(
@@ -158,7 +188,6 @@ private fun PlannerScreenContent(
                                 )
                                 Spacer(Modifier.height(10.dp))
                             }
-
                         }
                     }
                 }
@@ -166,6 +195,7 @@ private fun PlannerScreenContent(
         }
     }
 }
+
 
 
 @Composable

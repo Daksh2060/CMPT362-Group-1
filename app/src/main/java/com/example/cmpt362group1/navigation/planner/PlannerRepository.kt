@@ -7,6 +7,7 @@ import com.example.cmpt362group1.database.EventRepositoryImpl
 import com.example.cmpt362group1.database.UserRepository
 import com.example.cmpt362group1.database.UserRepositoryImpl
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
@@ -23,6 +24,7 @@ class FirestorePlannerRepository(
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
 ) : PlannerRepository {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override fun streamEvents(query: String?): Flow<List<Event>> {
         val uid = auth.currentUser?.uid
         Log.d("PlannerDebug", "streamEvents() uid = $uid")
