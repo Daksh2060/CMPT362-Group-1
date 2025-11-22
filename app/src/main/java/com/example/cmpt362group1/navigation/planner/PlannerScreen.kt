@@ -54,7 +54,13 @@ private fun PlannerScreenContent(
             val q = (uiState as? PlannerUiState.Content)?.query.orEmpty()
             var text by rememberSaveable { mutableStateOf(q) }
 
-            LaunchedEffect(q) { if (q != text) text = q }
+            LaunchedEffect(uiState) {
+                if (uiState is PlannerUiState.Content) {
+                    val q = uiState.query
+                    if (q != text) text = q
+                }
+            }
+
 
             OutlinedTextField(
                 value = text,
