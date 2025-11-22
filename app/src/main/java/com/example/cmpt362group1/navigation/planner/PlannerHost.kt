@@ -17,8 +17,6 @@ fun PlannerHost(
     PlannerScreen(
         uiState = state,
         onSearchChange = vm::onSearchChange,
-        onEventClick  = onEventClick,
-        onEditClick   = onEditClick,
-        onCreateClick = onCreateClick
+        onEventClick  = onEventClick
     )
 }
