@@ -1,20 +1,55 @@
 package com.example.cmpt362group1.auth
 
 import android.app.Activity
-import android.util.Log
+import com.example.cmpt362group1.R
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
+
+
+@Composable
+fun BubbleText(
+    text: String,
+    fontSize: TextUnit = MaterialTheme.typography.headlineMedium.fontSize
+) {
+    Box {
+        Text(
+            text = text,
+            fontSize = fontSize,
+            color = Color.Black,
+            style = LocalTextStyle.current.copy(
+                shadow = Shadow(
+                    color = Color.Black,
+                    blurRadius = 2f,
+                    offset = Offset(2f, 2f)
+                )
+            )
+        )
+        Text(
+            text = text,
+            fontSize = fontSize,
+            color = Color(0x00000000)
+        )
+    }
+}
 
 @Composable
 fun LoginScreen(
@@ -22,27 +57,19 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit
 ) {
     val context = LocalContext.current
-    var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-    Log.d("INFO LoginScreen", "At LoginScreen")
 
-    // Google Sign-In configs
     val gso = remember {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken("657057707753-8k8h7mt0muj5a6b5kj4hsjsslef83djr.apps.googleusercontent.com")
             .requestEmail()
             .build()
     }
+    val googleSignInClient = remember { GoogleSignIn.getClient(context, gso) }
 
-    val googleSignInClient = remember {
-        GoogleSignIn.getClient(context, gso)
-    }
-
-    // launcher for Google Sign-In
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        Log.d("INFO LoginScreen", "Result: ${result}")
         if (result.resultCode == Activity.RESULT_OK) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             val account = task.getResult(ApiException::class.java)
@@ -58,17 +85,16 @@ fun LoginScreen(
                     },
                     onError = { error ->
                         isLoading = false
-                        errorMessage = error
-                        Log.e("INFO LoginScreen", "Sign in error: $error")
                     }
                 )
             }
         }
-
         isLoading = false
     }
 
-    Scaffold { padding ->
+    Scaffold(
+        containerColor = Color.White
+    ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -78,33 +104,77 @@ fun LoginScreen(
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(text = "Campus Event Explorer")
-                Text(text = "Sign in to continue")
-                Button(
-                    onClick = {
-                        errorMessage = null
-                        isLoading = true
-                        val signInIntent = googleSignInClient.signInIntent
-                        launcher.launch(signInIntent)
-                    },
-                    enabled = !isLoading,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                        )
-                    } else {
-                        Text("Sign in with Google")
-                    }
+                    Icon(
+                        painter = painterResource(id = R.drawable.sfu_logo),
+                        contentDescription = "App Logo",
+                        tint = Color.Unspecified,
+                        modifier = Modifier.size(90.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    BubbleText(
+                        text = "Campus Event Explorer",
+                        fontSize = 36.sp
+                    )
                 }
 
-                errorMessage?.let { error ->
-                    Card { Text(text = error) }
+                Spacer(modifier = Modifier.height(32.dp))
+
+                Card(
+                    shape = RoundedCornerShape(18.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 10.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF7F7F7)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(58.dp)
+                        .clickable(enabled = !isLoading) {
+                            isLoading = true
+                            launcher.launch(googleSignInClient.signInIntent)
+                        }
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(26.dp),
+                                color = Color.Black
+                            )
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.google_logo),
+                                    contentDescription = "Google Logo",
+                                    tint = Color.Unspecified,
+                                    modifier = Modifier.size(24.dp)
+                                )
+
+                                Spacer(modifier = Modifier.width(12.dp))
+
+                                Text(
+                                    text = "Sign in with Google",
+                                    color = Color.Black,
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
+                        }
+                    }
                 }
 
             }
         }
     }
 }
+
