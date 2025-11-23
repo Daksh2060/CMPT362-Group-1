@@ -173,7 +173,7 @@ fun EditEvent(
 
         is EventViewModel.EventUiState.Success -> {
             if (!initialized) {
-                eventFormViewModel.formInput = state.event
+                eventFormViewModel.loadFromEvent(state.event)
                 initialized = true
             }
 
