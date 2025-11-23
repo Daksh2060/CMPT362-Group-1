@@ -101,8 +101,6 @@ class EventViewModel(
                 _operationState.value = OperationUiState.Success("Event saved successfully")
                 Log.d("EventViewModel", "Event saved with ID: $eventId")
 
-                updateWidget(context)
-
                 if (eventId != null) {
                     onSuccess(eventId)
                 }
@@ -141,7 +139,6 @@ class EventViewModel(
 
             if (result.isSuccess) {
                 _operationState.value = OperationUiState.Success("All events cleared")
-                updateWidget(context)
             } else {
                 val error = result.exceptionOrNull()
                 _operationState.value = OperationUiState.Error(
@@ -149,11 +146,6 @@ class EventViewModel(
                 )
             }
         }
-    }
-
-    private fun updateWidget(context: Context) {
-        val intent = Intent("com.cmpt362group1.WIDGET_UPDATE")
-        context.sendBroadcast(intent)
     }
 
     fun startComments(eventId: String) {

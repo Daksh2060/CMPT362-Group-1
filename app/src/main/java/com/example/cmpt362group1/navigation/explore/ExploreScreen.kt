@@ -14,12 +14,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.cmpt362group1.database.Event
 import com.example.cmpt362group1.database.EventViewModel
 import com.example.cmpt362group1.database.UserViewModel
+import com.example.cmpt362group1.widget.WidgetUpdater
 import com.google.android.gms.maps.model.LatLng
 
 @Composable
@@ -34,6 +36,8 @@ fun MapStateHolder(
         CampusLocation("Vancouver", LatLng(49.284572597611565, -123.11142976880664), zoom = 19f)
     )
 
+    val context = LocalContext.current
+
     val cityNames = sfuLocations.map { it.name }
     val initialLocation = sfuLocations.first()
     var selectedLocation by remember { mutableStateOf(initialLocation) }
@@ -43,6 +47,10 @@ fun MapStateHolder(
         is EventViewModel.EventsUiState.Success ->
             (eventsState as EventViewModel.EventsUiState.Success).events
         else -> emptyList()
+    }
+
+    LaunchedEffect(events) {
+        WidgetUpdater.updateWidget(context, events) // push updates for widget
     }
 
     Log.d("MapStateHolder INFO", "Read events: $events")
