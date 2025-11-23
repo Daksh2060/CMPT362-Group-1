@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,7 +46,8 @@ fun EventDetailScreen(
     userViewModel: UserViewModel,
     authViewModel: AuthViewModel,
     onNavigateBack: () -> Unit,
-    onEditEvent: (String) -> Unit = {}
+    onEditEvent: (String) -> Unit = {},
+    allowEditDelete: Boolean = true
 ) {
     val eventState by eventViewModel.eventState.collectAsState()
     val userState by userViewModel.userState.collectAsState()
@@ -177,6 +179,7 @@ fun EventDetailScreen(
                         EventDetailScrollableContent(
                             event = event,
                             isHost = isHost,
+                            allowEditDelete = allowEditDelete,
                             isJoined = isJoined,
                             onToggleJoin = {
                                 val uid = authViewModel.getUserId()
@@ -348,6 +351,7 @@ fun EventDetailScreen(
 private fun EventDetailScrollableContent(
     event: Event,
     isHost: Boolean,
+    allowEditDelete: Boolean,
     isJoined: Boolean,
     onToggleJoin: () -> Unit,
     comments: List<Comment>,
@@ -386,7 +390,7 @@ private fun EventDetailScrollableContent(
 
             Spacer(Modifier.height(16.dp))
 
-            if (isHost) {
+            if (isHost && allowEditDelete) {
                 HostSummaryPanel(
                     participantsCount = participantsCount,
                     arrivedCount = arrivedCount,

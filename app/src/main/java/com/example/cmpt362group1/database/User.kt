@@ -14,15 +14,15 @@ data class User(
     val email: String = "",
     val displayName: String = "",
     val photoUrl: String = "",
-    val description: String = "I don't have a bio yet... :/",
-
+    val description: String = "I have a bio now!",
+    val username: String = "",
+    val pronouns: String = "",
+    val link: String = "",
+    val followers: Int = 0,
+    val following: Int = 0,
     val firstName: String = "",
     val lastName: String = "",
-    val birthdate: Date? = null,
-    val faculty: String = "",
-    val occupancy: String = "",
-    val enrollmentYear: Int? = null,
-    val hobby: String = "",
+
 
     val eventsCreated: ArrayList<String> = arrayListOf(),
     val eventsJoined: ArrayList<String> = arrayListOf(),
