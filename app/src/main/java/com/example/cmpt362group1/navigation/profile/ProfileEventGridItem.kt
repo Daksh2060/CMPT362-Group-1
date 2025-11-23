@@ -1,10 +1,12 @@
 package com.example.cmpt362group1.navigation.profile
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +32,7 @@ fun ProfileEventGridItem(
     Box(
         modifier = Modifier
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(2.dp))
+            .clip(RoundedCornerShape(8.dp))
             .clickable { onClick() }
     ) {
         if (event.imageUrl.isNotEmpty()) {
@@ -43,11 +45,28 @@ fun ProfileEventGridItem(
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
+
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .fillMaxWidth()
+                    .padding(4.dp)
+                    .clip(RoundedCornerShape(bottomStart = 8.dp, bottomEnd = 8.dp))
+                    .background(Color(0x55000000)),
+                contentAlignment = Alignment.CenterStart
+            ) {
+                Text(
+                    text = event.title,
+                    style = MaterialTheme.typography.bodySmall.copy(color = Color.White),
+                    modifier = Modifier.padding(4.dp),
+                    maxLines = 1
+                )
+            }
         } else {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(2.dp)),
+                    .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -61,3 +80,4 @@ fun ProfileEventGridItem(
         }
     }
 }
+

@@ -1,7 +1,6 @@
 package com.example.cmpt362group1.navigation.profile
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,11 +9,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.outlined.Person
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -23,7 +22,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,8 +33,6 @@ import com.example.cmpt362group1.database.ImageStoragePath
 import com.example.cmpt362group1.database.ImageViewModel
 import com.example.cmpt362group1.database.User
 import com.example.cmpt362group1.database.UserViewModel
-import java.text.SimpleDateFormat
-import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,19 +41,17 @@ fun EditProfileScreen(
     userViewModel: UserViewModel,
     userProfile: User
 ) {
-    val context=LocalContext.current
+    val context = LocalContext.current
     val imageViewModel: ImageViewModel = viewModel()
 
     var name by remember { mutableStateOf(
         userProfile.displayName.ifEmpty {
             if (userProfile.firstName.isNotEmpty() || userProfile.lastName.isNotEmpty()) {
                 "${userProfile.firstName} ${userProfile.lastName}".trim()
-
-            } else {
-                ""
-            }
+            } else ""
         }
     )}
+
     var username by remember { mutableStateOf(userProfile.username) }
     var pronouns by remember { mutableStateOf(userProfile.pronouns.ifEmpty { "None" }) }
     var bio by remember { mutableStateOf(userProfile.description) }
@@ -67,24 +61,20 @@ fun EditProfileScreen(
     var profilePhotoUrl by remember { mutableStateOf(userProfile.photoUrl) }
     var expanded by remember { mutableStateOf(false) }
 
-    // Photo choice
     val photoPicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri: Uri? ->
         if (uri != null) {
             selectedImageUri = uri
-            // Upload image
             imageViewModel.uploadImage(
                 uri,
                 context,
-                ImageStoragePath.UserProfile,
-                { downloadUrl ->
-                    profilePhotoUrl = downloadUrl
-                    userViewModel.updateUser(userProfile.id,mapOf("photoUrl" to downloadUrl))
-                }
-            )
+                ImageStoragePath.UserProfile
+            ) { downloadUrl ->
+                profilePhotoUrl = downloadUrl
+                userViewModel.updateUser(userProfile.id, mapOf("photoUrl" to downloadUrl))
+            }
         }
-
     }
 
     Scaffold(
@@ -95,17 +85,18 @@ fun EditProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "Edit profile",
-                            textAlign = TextAlign.Center
-                        )
+                        Text("Edit profile", textAlign = TextAlign.Center)
                     }
                 },
                 navigationIcon = {
                     TextButton(onClick = { navController.popBackStack() }) {
                         Text("Cancel", color = MaterialTheme.colorScheme.primary)
                     }
-                },
+                },colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black,
+                    navigationIconContentColor = MaterialTheme.colorScheme.primary
+                ),
                 actions = {
                     TextButton(
                         onClick = {
@@ -116,7 +107,6 @@ fun EditProfileScreen(
                             updates["description"] = bio
                             updates["link"] = link
 
-                            // Parse first and last name
                             val nameParts = name.trim().split(" ", limit = 2)
                             if (nameParts.isNotEmpty()) {
                                 updates["firstName"] = nameParts[0]
@@ -127,23 +117,25 @@ fun EditProfileScreen(
                             navController.popBackStack()
                         }
                     ) {
-                        Text("Done", color= MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        Text("Done", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
                 }
             )
         }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(Color.White)
                 .verticalScroll(rememberScrollState())
         ) {
-            // Profile photo
+
+            Spacer(Modifier.height(24.dp))
+
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 24.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 AsyncImage(
@@ -153,44 +145,53 @@ fun EditProfileScreen(
                         .build(),
                     contentDescription = "Profile Picture",
                     modifier = Modifier
-                        .size(86.dp)
+                        .size(90.dp)
                         .clip(CircleShape)
                         .border(1.dp, Color.LightGray, CircleShape)
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(Modifier.height(12.dp))
 
                 Text(
                     text = "Change profile photo",
-                    color= MaterialTheme.colorScheme.primary,
+                    color = MaterialTheme.colorScheme.primary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable {
                         photoPicker.launch(
-                            PickVisualMediaRequest(
-                                ActivityResultContracts.PickVisualMedia.ImageOnly
-                            )
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                         )
                     }
                 )
             }
 
-            HorizontalDivider()
+            Spacer(Modifier.height(24.dp))
 
-            // Name
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Text(
-                    text = "Name",
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
+            @Composable
+            fun FieldCard(content: @Composable ColumnScope.() -> Unit) {
+                val cardShape = RoundedCornerShape(12.dp)
+
+                Surface(
+                    color = Color.White,
+                    shape = cardShape,
+                    tonalElevation = 2.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .clip(cardShape)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        content = content
+                    )
+                }
+            }
+
+            FieldCard {
+                Text("Name", fontSize = 12.sp, color = Color.Gray)
+                Spacer(Modifier.height(4.dp))
                 OutlinedTextField(
-                    value =name,
+                    value = name,
                     onValueChange = { name = it },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
@@ -198,20 +199,9 @@ fun EditProfileScreen(
                 )
             }
 
-            HorizontalDivider()
-
-            // Username
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Text(
-                    text = "Username",
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
+            FieldCard {
+                Text("Username", fontSize = 12.sp, color = Color.Gray)
+                Spacer(Modifier.height(4.dp))
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
@@ -221,35 +211,20 @@ fun EditProfileScreen(
                 )
             }
 
-            HorizontalDivider()
-
-            // Pronouns
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Text(
-                    text = "Pronouns",
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
+            FieldCard {
+                Text("Pronouns", fontSize = 12.sp, color = Color.Gray)
+                Spacer(Modifier.height(4.dp))
 
                 ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onExpandedChange = { expanded = !expanded },
-                    modifier = Modifier.fillMaxWidth()
+                    onExpandedChange = { expanded = !expanded }
                 ) {
                     OutlinedTextField(
                         value = pronouns,
                         onValueChange = {},
                         readOnly = true,
                         trailingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.ArrowDropDown,
-                                contentDescription = "Dropdown"
-                            )
+                            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
                         },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -274,23 +249,12 @@ fun EditProfileScreen(
                 }
             }
 
-            HorizontalDivider()
-
-            // Bio
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Text(
-                    text = "Bio",
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
+            FieldCard {
+                Text("Bio", fontSize = 12.sp, color = Color.Gray)
+                Spacer(Modifier.height(4.dp))
                 OutlinedTextField(
                     value = bio,
-                    onValueChange = { bio=it },
+                    onValueChange = { bio = it },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp),
@@ -299,40 +263,21 @@ fun EditProfileScreen(
                 )
             }
 
-            HorizontalDivider()
-
-            // Links
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-            ) {
-                Text(
-                    text = "Links",
-                    fontSize = 12.sp,
-                    color = Color.Gray,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+            FieldCard {
+                Text("Links", fontSize = 12.sp, color = Color.Gray)
+                Spacer(Modifier.height(8.dp))
 
                 if (link.isEmpty()) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { showLinkDialog= true }
-                            .padding(vertical = 12.dp),
+                            .clickable { showLinkDialog = true }
+                            .padding(vertical = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Add Link",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 14.sp
-                        )
-                        Text(
-                            text = "+",
-                            color = Color.Gray,
-                            fontSize = 20.sp
-                        )
+                        Text("Add Link", color = MaterialTheme.colorScheme.primary)
+                        Text("+", color = Color.Gray, fontSize = 20.sp)
                     }
                 } else {
                     Row(
@@ -340,15 +285,11 @@ fun EditProfileScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = link,
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                        Column(Modifier.weight(1f)) {
+                            Text(link, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
                         }
                         Row {
-                            TextButton(onClick = { showLinkDialog =true }) {
+                            TextButton(onClick = { showLinkDialog = true }) {
                                 Text("Edit", fontSize = 12.sp)
                             }
                             TextButton(onClick = { link = "" }) {
@@ -360,7 +301,6 @@ fun EditProfileScreen(
             }
         }
 
-        // Link
         if (showLinkDialog) {
             var tempLink by remember { mutableStateOf(link) }
 
@@ -376,21 +316,30 @@ fun EditProfileScreen(
                         singleLine = true
                     )
                 },
-                confirmButton= {
-                    TextButton(
+                confirmButton = {
+                    Button(
                         onClick = {
                             link = tempLink
                             showLinkDialog = false
-                        }
+                        },
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.padding(horizontal = 4.dp)
                     ) {
-                        Text("Save")
+                        Text("Save", fontWeight = FontWeight.SemiBold)
                     }
                 },
-                dismissButton= {
-                    TextButton(onClick = { showLinkDialog = false }) {
-                        Text("Cancel")
+                dismissButton = {
+                    Button(
+                        onClick = { showLinkDialog = false },
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.LightGray),
+                        modifier = Modifier.padding(horizontal = 4.dp)
+                    ) {
+                        Text("Cancel", fontWeight = FontWeight.SemiBold)
                     }
-                }
+                },
+                containerColor = Color.White,
+                shape = RoundedCornerShape(12.dp)
             )
         }
     }

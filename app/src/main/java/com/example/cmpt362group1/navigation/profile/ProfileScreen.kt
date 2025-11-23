@@ -1,8 +1,8 @@
 package com.example.cmpt362group1.navigation.profile
 
 import android.content.Intent
-import android.net.Uri
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -38,6 +38,23 @@ import androidx.compose.ui.unit.times
 import androidx.core.net.toUri
 import com.example.cmpt362group1.Route
 
+
+@Composable
+private fun StatBlock(label: String, value: Int) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = value.toString(),
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp
+        )
+        Text(
+            text = label,
+            color = Color.Gray,
+            fontSize = 14.sp
+        )
+    }
+}
+
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,
@@ -58,7 +75,7 @@ fun ProfileScreen(
     }
 
     val userState by userViewModel.userState.collectAsState()
-    when (val state = userState) {
+    when (val state = userState) { // Not used yet?
         is UserUiState.Loading -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -120,105 +137,49 @@ fun ProfileView(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
+            .background(Color.White)
             .padding(16.dp)
+
     ) {
+        item {
+            Text(
+                text = userProfile.username.ifEmpty { "username" },
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
+            )
+        }
+
         item {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text =userProfile.username.ifEmpty { "username" },
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp
-                )
-            }
-        }
-
-        item {
-            Row(
-                modifier=Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                verticalAlignment = Alignment.Top,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                //Profile picture
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(userProfile.photoUrl)
                         .crossfade(true)
                         .build(),
-                    contentDescription ="Profile Picture",
+                    contentDescription = "Profile Picture",
                     modifier = Modifier
                         .size(86.dp)
                         .clip(CircleShape)
                         .border(1.dp, Color.LightGray, CircleShape)
                 )
 
-                Spacer(modifier = Modifier.width(16.dp))
-
-                // define order
+                Spacer(modifier = Modifier.width(24.dp))
                 Row(
-                    modifier = Modifier.weight(1f),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.spacedBy(24.dp),
+                    modifier = Modifier.wrapContentWidth()
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "${userProfile.eventsJoined.size}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Text(
-                            text = "Events",
-                            style =MaterialTheme.typography.bodyMedium,
-                            fontSize= 14.sp
-                        )
-                    }
-
-                    // Followers
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "${userProfile.followers}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            fontSize= 18.sp
-                        )
-                        Text(
-                            text= "Followers",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontSize = 14.sp
-                        )
-                    }
-
-                    // Following
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "${userProfile.following}",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Text(
-                            text = "Following",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontSize = 14.sp
-                        )
-                    }
+                    StatBlock(label = "Events", value = userProfile.eventsJoined.size)
+                    StatBlock(label = "Followers", value = userProfile.followers)
+                    StatBlock(label = "Following", value = userProfile.following)
                 }
             }
         }
@@ -317,10 +278,7 @@ fun ProfileView(
         }
 
         item {
-            // Events divider
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            // Events header
             Text(
                 text = "Events",
                 style = MaterialTheme.typography.titleMedium,
