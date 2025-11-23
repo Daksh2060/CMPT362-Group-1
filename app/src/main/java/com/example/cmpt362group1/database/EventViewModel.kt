@@ -24,6 +24,7 @@ class EventViewModel(
 
     private var commentsListener: ListenerRegistration? = null
     private var participantsListener: ListenerRegistration? = null
+    private var checkInListener: ListenerRegistration? = null
 
     private val _eventsState = MutableStateFlow<EventsUiState>(EventsUiState.Loading)
     val eventsState: StateFlow<EventsUiState> = _eventsState.asStateFlow()
@@ -40,6 +41,12 @@ class EventViewModel(
 
     private val _participantsCount = MutableStateFlow(0)
     val participantsCount: StateFlow<Int> = _participantsCount.asStateFlow()
+
+    private val _arrivedCount = MutableStateFlow(0)
+    val arrivedCount: StateFlow<Int> = _arrivedCount.asStateFlow()
+
+    private val _isCurrentUserCheckedIn = MutableStateFlow(false)
+    val isCurrentUserCheckedIn: StateFlow<Boolean> = _isCurrentUserCheckedIn.asStateFlow()
 
     init {
         loadAllEvents()
@@ -116,6 +123,32 @@ class EventViewModel(
             }
         }
     }
+
+    fun updateEvent(
+        eventId: String,
+        updatedEvent: Event,
+        onSuccess: () -> Unit = {},
+        onError: (Throwable?) -> Unit = {}
+    ) {
+        _operationState.value = OperationUiState.Loading
+
+        db.collection("events")
+            .document(eventId)
+            .set(updatedEvent.copy(id = eventId))
+            .addOnSuccessListener {
+                Log.d("EventViewModel", "Event updated: $eventId")
+                _operationState.value =
+                    OperationUiState.Success("Event updated successfully")
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                Log.e("EventViewModel", "Failed to update event", e)
+                _operationState.value =
+                    OperationUiState.Error(e.message ?: "Failed to update event")
+                onError(e)
+            }
+    }
+
 
     fun addEvent(event: Event) {
         viewModelScope.launch {
@@ -227,10 +260,96 @@ class EventViewModel(
             }
     }
 
+    fun startCheckIns(eventId: String, currentUserId: String?) {
+        checkInListener?.remove()
+
+        _arrivedCount.value = 0
+        _isCurrentUserCheckedIn.value = false
+
+        checkInListener = db.collection("events")
+            .document(eventId)
+            .collection("checkins")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    Log.e("EventViewModel", "Error listening check-ins", error)
+                    _arrivedCount.value = 0
+                    _isCurrentUserCheckedIn.value = false
+                    return@addSnapshotListener
+                }
+
+                val docs = snapshot?.documents ?: emptyList()
+                _arrivedCount.value = docs.size
+
+                if (currentUserId != null) {
+                    _isCurrentUserCheckedIn.value =
+                        docs.any { it.getString("userId") == currentUserId }
+                } else {
+                    _isCurrentUserCheckedIn.value = false
+                }
+            }
+    }
+
+    fun manualCheckIn(eventId: String, userId: String) {
+        val data = mapOf(
+            "userId" to userId,
+            "method" to "manual",
+            "timestamp" to System.currentTimeMillis()
+        )
+
+        db.collection("events")
+            .document(eventId)
+            .collection("checkins")
+            .document(userId)
+            .set(data)
+            .addOnSuccessListener {
+                Log.d("EventViewModel", "Manual check-in success")
+            }
+            .addOnFailureListener { e ->
+                Log.e("EventViewModel", "Manual check-in failed", e)
+            }
+    }
+
+    fun cancelManualCheckIn(eventId: String, userId: String) {
+        db.collection("events")
+            .document(eventId)
+            .collection("checkins")
+            .document(userId)
+            .delete()
+            .addOnSuccessListener {
+                Log.d("EventViewModel", "Manual check-in cancelled")
+            }
+            .addOnFailureListener { e ->
+                Log.e("EventViewModel", "Cancel manual check-in failed", e)
+            }
+    }
+
+    fun deleteEvent(
+        eventId: String,
+        onResult: (Boolean) -> Unit = {}
+    ) {
+        _operationState.value = OperationUiState.Loading
+
+        db.collection("events")
+            .document(eventId)
+            .delete()
+            .addOnSuccessListener {
+                Log.d("EventViewModel", "Event deleted: $eventId")
+                _operationState.value = OperationUiState.Success("Event deleted")
+                onResult(true)
+            }
+            .addOnFailureListener { e ->
+                Log.e("EventViewModel", "Failed to delete event", e)
+                _operationState.value =
+                    OperationUiState.Error(e.message ?: "Failed to delete event")
+                onResult(false)
+            }
+    }
+
     override fun onCleared() {
         super.onCleared()
         commentsListener?.remove()
         participantsListener?.remove()
+        checkInListener?.remove()
     }
 
     sealed class EventsUiState {

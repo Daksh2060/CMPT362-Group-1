@@ -18,6 +18,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cmpt362group1.event.CreateEvent
 import com.example.cmpt362group1.event.Fab
+import com.example.cmpt362group1.event.CreateEvent
+import com.example.cmpt362group1.event.EditEvent
 import com.example.cmpt362group1.navigation.BottomNavigationBar
 import com.example.cmpt362group1.navigation.explore.MapStateHolder
 import com.example.cmpt362group1.navigation.profile.ProfileScreen
@@ -129,6 +131,19 @@ fun MainScreen(
                     )
                 }
 
+                composable("${Route.EditEvent.route}/{eventId}") { backStackEntry ->
+                    val eventId = backStackEntry.arguments?.getString("eventId")
+                        ?: return@composable
+
+                    EditEvent(
+                        eventId = eventId,
+                        onExit = { navController.popBackStack() },
+                        eventViewModel = eventViewModel,
+                        userViewModel = userViewModel,
+                        authViewModel = authViewModel
+                    )
+                }
+
                 composable("${Route.EventDetail.route}/{eventId}") { backStackEntry ->
                     val eventId = backStackEntry.arguments?.getString("eventId")
                         ?: return@composable
@@ -138,7 +153,10 @@ fun MainScreen(
                         eventViewModel = eventViewModel,
                         userViewModel = userViewModel,
                         authViewModel = authViewModel,
-                        onNavigateBack = { navController.navigateUp() }
+                        onNavigateBack = { navController.navigateUp() },
+                        onEditEvent = { id ->
+                            navController.navigate("${Route.EditEvent.route}/$id")
+                        }
                     )
                 }
             }

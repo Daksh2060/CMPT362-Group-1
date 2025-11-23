@@ -9,7 +9,6 @@ import com.example.cmpt362group1.database.Event
 
 class EventFormViewModel() : ViewModel() {
     var formInput by mutableStateOf(Event())
-        private set
 
     var imageUri: Uri? by mutableStateOf(null)
         private set

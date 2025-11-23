@@ -1,7 +1,9 @@
 package com.example.cmpt362group1.event.detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -12,6 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.example.cmpt362group1.auth.AuthViewModel
 import com.example.cmpt362group1.database.Comment
 import com.example.cmpt362group1.database.Event
@@ -26,12 +33,15 @@ fun EventDetailScreen(
     eventViewModel: EventViewModel,
     userViewModel: UserViewModel,
     authViewModel: AuthViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onEditEvent: (String) -> Unit = {}
 ) {
     val eventState by eventViewModel.eventState.collectAsState()
     val userState by userViewModel.userState.collectAsState()
     val commentsState by eventViewModel.commentsState.collectAsState()
     val participantsCount by eventViewModel.participantsCount.collectAsState()
+    val arrivedCount by eventViewModel.arrivedCount.collectAsState()
+    val isCurrentUserCheckedIn by eventViewModel.isCurrentUserCheckedIn.collectAsState()
 
     LaunchedEffect(eventId) {
         eventViewModel.loadEvent(eventId)
@@ -39,11 +49,18 @@ fun EventDetailScreen(
         eventViewModel.startParticipants(eventId)
     }
 
+    var currentUserId by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(Unit) {
         val uid = authViewModel.getUserId()
+        currentUserId = uid
         if (uid != null) {
             userViewModel.loadUser(uid)
         }
+    }
+
+    LaunchedEffect(eventId, currentUserId) {
+        eventViewModel.startCheckIns(eventId, currentUserId)
     }
 
     var isJoined by remember { mutableStateOf(false) }
@@ -69,6 +86,9 @@ fun EventDetailScreen(
 
     var commentText by remember { mutableStateOf("") }
     var replyTo by remember { mutableStateOf<Comment?>(null) }
+
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var eventIdPendingDelete by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -118,6 +138,8 @@ fun EventDetailScreen(
 
             is EventViewModel.EventUiState.Success -> {
                 val event = (eventState as EventViewModel.EventUiState.Success).event
+                val isHost = currentUserId != null && event.createdBy == currentUserId
+                val listState = rememberLazyListState()
 
                 Column(
                     modifier = Modifier
@@ -132,6 +154,7 @@ fun EventDetailScreen(
                     ) {
                         EventDetailScrollableContent(
                             event = event,
+                            isHost = isHost,
                             isJoined = isJoined,
                             onToggleJoin = {
                                 val uid = authViewModel.getUserId()
@@ -148,10 +171,54 @@ fun EventDetailScreen(
                             commentsLoading = commentsLoading,
                             commentsError = commentsError,
                             participantsCount = participantsCount,
+                            arrivedCount = arrivedCount,
+                            isCurrentUserCheckedIn = isCurrentUserCheckedIn,
+                            onToggleManualCheckIn = { currentlyCheckedIn ->
+                                val uid = authViewModel.getUserId()
+                                if (uid != null) {
+                                    if (currentlyCheckedIn) {
+                                        eventViewModel.cancelManualCheckIn(event.id, uid)
+                                    } else {
+                                        eventViewModel.manualCheckIn(event.id, uid)
+                                    }
+                                }
+                            },
                             onReplyClick = { target ->
                                 replyTo = target
+                            },
+                            listState = listState,
+                            onEditEvent = { onEditEvent(event.id) },
+                            onDeleteEvent = {
+                                eventIdPendingDelete = event.id
+                                showDeleteConfirm = true
                             }
                         )
+                    }
+
+                    val showScrollHint by remember {
+                        derivedStateOf { listState.canScrollForward }
+                    }
+
+                    if (showScrollHint) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "▼",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = "Scroll for more",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
 
                     if (replyTo != null) {
@@ -184,7 +251,13 @@ fun EventDetailScreen(
                                 val uid = authViewModel.getUserId()
                                 if (uid != null) {
                                     val name = currentUserName ?: "Anonymous"
-                                    eventViewModel.postComment(event.id, uid, name, text, replyTo?.id)
+                                    eventViewModel.postComment(
+                                        event.id,
+                                        uid,
+                                        name,
+                                        text,
+                                        replyTo?.id
+                                    )
                                 }
                                 commentText = ""
                                 replyTo = null
@@ -194,23 +267,58 @@ fun EventDetailScreen(
                 }
             }
         }
+
+        if (showDeleteConfirm && eventIdPendingDelete != null) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirm = false },
+                title = { Text("Delete event?") },
+                text = {
+                    Text("This will remove the event for all participants. This action cannot be undone.")
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val id = eventIdPendingDelete!!
+                            showDeleteConfirm = false
+                            eventViewModel.deleteEvent(id) { success ->
+                                if (success) {
+                                    onNavigateBack()
+                                }
+                            }
+                        }
+                    ) {
+                        Text("Delete", color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirm = false }) {
+                        Text("Cancel")
+                    }
+                }
+            )
+        }
     }
 }
 
 @Composable
 private fun EventDetailScrollableContent(
     event: Event,
+    isHost: Boolean,
     isJoined: Boolean,
     onToggleJoin: () -> Unit,
     comments: List<Comment>,
     commentsLoading: Boolean,
     commentsError: String?,
     participantsCount: Int,
+    arrivedCount: Int,
+    isCurrentUserCheckedIn: Boolean,
+    onToggleManualCheckIn: (Boolean) -> Unit,
     onReplyClick: (Comment) -> Unit,
+    listState: LazyListState,
+    onEditEvent: () -> Unit,
+    onDeleteEvent: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val listState = rememberLazyListState()
-
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = listState,
@@ -218,16 +326,38 @@ private fun EventDetailScrollableContent(
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         item {
+            EventHeaderImagePlaceholder(
+                imageUrl = event.imageUrl,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(220.dp)
+            )
+
+            Spacer(Modifier.height(16.dp))
+
             Text(
                 text = event.title,
                 style = MaterialTheme.typography.headlineMedium
             )
 
-            Text(
-                text = "Participants: $participantsCount",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Spacer(Modifier.height(8.dp))
+
+            if (isHost) {
+                HostSummaryPanel(
+                    participantsCount = participantsCount,
+                    arrivedCount = arrivedCount,
+                    onEditClick = onEditEvent,
+                    onDeleteClick = onDeleteEvent
+                )
+            } else {
+                Text(
+                    text = "Participants: $participantsCount",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(Modifier.height(8.dp))
 
             Text(
                 text = event.location,
@@ -268,6 +398,21 @@ private fun EventDetailScrollableContent(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(if (isJoined) "Remove from Planner" else "Add to Planner")
+            }
+
+            if (isJoined) {
+                Spacer(Modifier.height(8.dp))
+                OutlinedButton(
+                    onClick = { onToggleManualCheckIn(isCurrentUserCheckedIn) },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (isCurrentUserCheckedIn)
+                            "Cancel check-in"
+                        else
+                            "Manual check-in"
+                    )
+                }
             }
 
             Spacer(Modifier.height(16.dp))
@@ -331,12 +476,73 @@ private fun EventDetailScrollableContent(
                     key = { it.id }
                 ) { c ->
                     val parent = c.parentId?.let { pid -> commentMap[pid] }
+                    val isHostComment = c.userId == event.createdBy
+
                     CommentRow(
                         comment = c,
                         parent = parent,
+                        isHostComment = isHostComment,
                         onReplyClick = onReplyClick
                     )
                     Spacer(Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HostSummaryPanel(
+    participantsCount: Int,
+    arrivedCount: Int,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    val notArrived = (participantsCount - arrivedCount).coerceAtLeast(0)
+
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        tonalElevation = 2.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = "Host view",
+                style = MaterialTheme.typography.titleSmall
+            )
+            Text(
+                text = "Total participants: $participantsCount",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "Arrived: $arrivedCount   Not arrived: $notArrived",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = "Automatic GPS check-in can share this count.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(Modifier.height(4.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                TextButton(onClick = onEditClick) {
+                    Text("Edit event")
+                }
+                TextButton(
+                    onClick = onDeleteClick,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Delete")
                 }
             }
         }
@@ -378,10 +584,29 @@ private fun CommentInputBar(
 private fun CommentRow(
     comment: Comment,
     parent: Comment?,
+    isHostComment: Boolean,
     onReplyClick: (Comment) -> Unit
 ) {
+    val containerModifier = if (isHostComment) {
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(8.dp)
+    } else {
+        Modifier.fillMaxWidth()
+    }
+
+    val nameColor =
+        if (isHostComment) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.primary
+
+    val textColor =
+        if (isHostComment) MaterialTheme.colorScheme.onPrimaryContainer
+        else MaterialTheme.colorScheme.onSurface
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = containerModifier,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
     ) {
@@ -415,15 +640,22 @@ private fun CommentRow(
                 }
             }
 
+            val nameLabel = buildString {
+                append(comment.userName.ifBlank { "Anonymous" })
+                if (isHostComment) {
+                    append(" (Host)")
+                }
+            }
+
             Text(
-                text = comment.userName.ifBlank { "Anonymous" },
+                text = nameLabel,
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = nameColor
             )
             Text(
                 text = comment.text,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = textColor
             )
         }
 
@@ -434,6 +666,39 @@ private fun CommentRow(
             Text(
                 text = "Reply",
                 style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+@Composable
+private fun EventHeaderImagePlaceholder(
+    imageUrl: String,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center
+    ) {
+        if (imageUrl.isNotBlank()) {
+            AsyncImage(
+                model = ImageRequest.Builder(context)
+                    .data(imageUrl)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = "Event image",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Text(
+                text = "No image",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
