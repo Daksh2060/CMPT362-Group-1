@@ -49,4 +49,9 @@ class PlannerViewModel(
     fun onSearchChange(q: String) {
         query.value = q
     }
+
+    fun clearSearch() {
+        query.value = ""
+    }
 }
+
