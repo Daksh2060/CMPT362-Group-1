@@ -7,7 +7,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -21,7 +20,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -36,8 +34,9 @@ import com.example.cmpt362group1.database.EventViewModel
 import com.example.cmpt362group1.database.User
 import com.example.cmpt362group1.database.UserUiState
 import com.example.cmpt362group1.database.UserViewModel
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.times
+import androidx.core.net.toUri
+import com.example.cmpt362group1.Route
 
 @Composable
 fun ProfileScreen(
@@ -48,7 +47,7 @@ fun ProfileScreen(
 ) {
     val navController = rememberNavController()
 
-    val uid = authViewModel.getUserId()
+    val uid = remember { authViewModel.getUserId() }
 
     Log.d("INFO ProfileScreen", "User ID: $uid")
 
@@ -75,7 +74,7 @@ fun ProfileScreen(
 
     NavHost(
         navController = navController,
-        startDestination = "profile_view"
+        startDestination = "profile_view",
     ) {
         composable("profile_view") {
             ProfileView(
@@ -92,18 +91,10 @@ fun ProfileScreen(
     }
 }
 
-// for past events
-data class PastEvent(
-    val title: String,
-    val club: String,
-    val date: String,
-    val role: String
-)
-
 @Composable
 fun ProfileView(
     navController: NavHostController,
-    mainNavController: NavHostController,
+    mainNavController: NavHostController, // for event details
     authViewModel: AuthViewModel,
     userProfile: User,
     eventViewModel: EventViewModel
@@ -292,14 +283,14 @@ fun ProfileView(
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
                         .clickable {
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(
+                            val intent = Intent(Intent.ACTION_VIEW,
                                 if (!userProfile.link.startsWith("http://") &&
-                                    !userProfile.link.startsWith("https://")) {
+                                    !userProfile.link.startsWith("https://")
+                                ) {
                                     "https://${userProfile.link}"
                                 } else {
                                     userProfile.link
-                                }
-                            ))
+                                }.toUri())
                             context.startActivity(intent)
                         }
                 )
@@ -364,10 +355,10 @@ fun ProfileView(
                     userScrollEnabled = false
                 ) {
                     items(pastEvents) { event ->
-                        EventGridItem(
+                        ProfileEventGridItem(
                             event = event,
                             onClick = {
-                                mainNavController.navigate("${com.example.cmpt362group1.Route.EventDetail.route}/${event.id}?readonly=true")
+                                mainNavController.navigate("${Route.EventDetail.route}/${event.id}?readonly=true")
                             }
                         )
                     }
@@ -396,46 +387,6 @@ fun ProfileView(
                 )
             ) {
                 Text("DEBUG: Delete User & Sign Out")
-            }
-        }
-    }
-}
-
-@Composable
-fun EventGridItem(
-    event: Event,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(2.dp))
-            .clickable { onClick() }
-    ) {
-        if (event.imageUrl.isNotEmpty()) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(event.imageUrl)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = event.title,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .border(1.dp, Color.LightGray, RoundedCornerShape(2.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = event.title,
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(4.dp),
-                    maxLines = 2
-                )
             }
         }
     }
