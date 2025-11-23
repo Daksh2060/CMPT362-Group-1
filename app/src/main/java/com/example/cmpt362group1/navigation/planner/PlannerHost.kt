@@ -1,6 +1,7 @@
 package com.example.cmpt362group1.navigation.planner
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -13,6 +14,12 @@ fun PlannerHost(
     onCreateClick: () -> Unit = {}
 ) {
     val state by vm.uiState.collectAsState()
+
+    DisposableEffect(Unit) {
+        onDispose {
+            vm.clearSearch()
+        }
+    }
 
     PlannerScreen(
         uiState = state,
