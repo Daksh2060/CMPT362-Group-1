@@ -1,13 +1,8 @@
 package com.example.cmpt362group1.navigation.profile
 
 import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,12 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -38,8 +29,7 @@ import com.example.cmpt362group1.database.UserViewModel
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,
-    userViewModel: UserViewModel,
-    profileViewModel: ProfileViewModel = ProfileViewModel()
+    userViewModel: UserViewModel
 ) {
     val navController = rememberNavController()
 
@@ -68,17 +58,12 @@ fun ProfileScreen(
 
     val userProfile = (userState as UserUiState.Success).user
 
-    // Load user's events
-    LaunchedEffect(userProfile.eventsJoined) {
-        profileViewModel.loadUserEvents(userProfile.eventsJoined)
-    }
-
     NavHost(
         navController = navController,
         startDestination = "profile_view"
     ) {
         composable("profile_view") {
-            ProfileView(navController, authViewModel, userProfile, profileViewModel)
+            ProfileView(navController, authViewModel, userProfile)
         }
         composable("edit_profile") {
             EditProfileScreen(navController, userViewModel, userProfile)
@@ -86,14 +71,23 @@ fun ProfileScreen(
     }
 }
 
+// for past events
+data class PastEvent(
+    val title: String,
+    val club: String,
+    val date: String,
+    val role: String
+)
+
 @Composable
 fun ProfileView(
     navController: NavHostController,
     authViewModel: AuthViewModel,
-    userProfile: User,
-    profileViewModel: ProfileViewModel
+    userProfile: User
 ) {
-    val eventsState by profileViewModel.eventsState.collectAsState()
+    // Some samples
+    val pastEventsIds = userProfile.eventsJoined
+    val pastEvents = emptyArray<Event>() // TODO: wire up the ids to get the real events
 
     LazyColumn(
         modifier = Modifier
@@ -147,7 +141,7 @@ fun ProfileView(
 
             // past events section header
             Text(
-                text = "My Planner Events",
+                text = "Past Events",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
@@ -156,58 +150,13 @@ fun ProfileView(
             )
         }
 
-        // past events grid (Instagram-like)
-        item {
-            when (val state = eventsState) {
-                is ProfileEventsState.Loading -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                }
-                is ProfileEventsState.Success -> {
-                    if (state.events.isEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "No events in your planner yet",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    } else {
-                        PastEventsGrid(events = state.events)
-                    }
-                }
-                is ProfileEventsState.Error -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Error loading events: ${state.message}",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-                ProfileEventsState.Idle -> {}
-            }
+        // past events list
+        items(pastEvents) { event ->
+            PastEventCard(event)
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         item {
-            Spacer(modifier = Modifier.height(24.dp))
-
             Button(
                 onClick = { authViewModel.signOut() },
                 modifier = Modifier.fillMaxWidth(),
@@ -232,67 +181,22 @@ fun ProfileView(
 }
 
 @Composable
-fun PastEventsGrid(events: List<Event>) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(max = 600.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+fun PastEventCard(event: Event) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        items(events) { event ->
-            EventGridItem(event)
-        }
-    }
-}
-
-@Composable
-fun EventGridItem(event: Event) {
-    Box(
-        modifier = Modifier
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(4.dp))
-            .clickable { /* TODO: Navigate to event detail */ }
-    ) {
-        // Event image
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(event.imageUrl.ifEmpty { "https://via.placeholder.com/300" })
-                .crossfade(true)
-                .build(),
-            contentDescription = event.title,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-
-        // Gradient overlay at bottom
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
-                .align(Alignment.BottomCenter)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.7f)
-                        )
-                    )
-                )
-        )
-
-        // Event title overlay
-        Text(
-            text = event.title,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(8.dp)
-        )
+                .padding(16.dp)
+        ) {
+            Text(
+                text = event.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
