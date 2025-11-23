@@ -7,4 +7,5 @@ sealed class Route(val route: String) {
     object Profile : Route("profile")
     object CreateEvent : Route("create_event")
     object EventDetail : Route("event_detail")
+    object EditEvent : Route("edit_event")
 }

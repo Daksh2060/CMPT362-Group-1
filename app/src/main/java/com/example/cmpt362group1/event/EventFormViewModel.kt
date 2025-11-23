@@ -65,4 +65,8 @@ class EventFormViewModel() : ViewModel() {
     fun resetForm() {
         formInput = Event()
     }
+
+    fun loadFromEvent(event: Event) {
+        formInput = event
+    }
 }
