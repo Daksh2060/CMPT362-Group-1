@@ -117,7 +117,12 @@ fun MainScreen(
 
 
                 composable(Route.Profile.route) {
-                    ProfileScreen(authViewModel, userViewModel)
+                    ProfileScreen(
+                        authViewModel = authViewModel,
+                        userViewModel = userViewModel,
+                        eventViewModel = eventViewModel,
+                        mainNavController = navController
+                    )
                 }
 
                 composable(Route.CreateEvent.route) {
@@ -144,9 +149,12 @@ fun MainScreen(
                     )
                 }
 
-                composable("${Route.EventDetail.route}/{eventId}") { backStackEntry ->
+                composable(
+                    route = "${Route.EventDetail.route}/{eventId}?readonly={readonly}",
+                ) { backStackEntry ->
                     val eventId = backStackEntry.arguments?.getString("eventId")
                         ?: return@composable
+                    val readonly = backStackEntry.arguments?.getString("readonly")?.toBoolean() ?: false
 
                     EventDetailScreen(
                         eventId = eventId,
@@ -156,7 +164,8 @@ fun MainScreen(
                         onNavigateBack = { navController.navigateUp() },
                         onEditEvent = { id ->
                             navController.navigate("${Route.EditEvent.route}/$id")
-                        }
+                        },
+                        allowEditDelete = !readonly
                     )
                 }
             }
