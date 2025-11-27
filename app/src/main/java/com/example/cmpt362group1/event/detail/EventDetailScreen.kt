@@ -37,17 +37,18 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventDetailScreen(
     eventId: String,
-    eventViewModel: EventViewModel,
-    userViewModel: UserViewModel,
-    authViewModel: AuthViewModel,
     onNavigateBack: () -> Unit,
     onEditEvent: (String) -> Unit = {},
-    allowEditDelete: Boolean = true
+    allowEditDelete: Boolean = true,
+    eventViewModel: EventViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(),
 ) {
     val eventState by eventViewModel.eventState.collectAsState()
     val userState by userViewModel.userState.collectAsState()

@@ -19,7 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val eventRepository: EventRepository = EventRepositoryImpl()
-        val eventViewModel = EventViewModel(eventRepository, applicationContext)
+        val eventViewModel = EventViewModel(eventRepository)
 
         val userRepository: UserRepository = UserRepositoryImpl()
         val userViewModel = UserViewModel(userRepository)
@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    AuthScreen(authViewModel, eventViewModel, userViewModel)
+                    AuthScreen()
                 }
             }
         }

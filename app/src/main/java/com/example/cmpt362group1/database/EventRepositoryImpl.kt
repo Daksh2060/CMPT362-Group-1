@@ -1,7 +1,7 @@
 package com.example.cmpt362group1.database
 
-import androidx.compose.runtime.snapshotFlow
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -61,6 +61,30 @@ class EventRepositoryImpl(
         }
     }
 
+    override suspend fun updateEvent(eventId: String, updatedEvent: Event): Result<Unit> {
+        return try {
+            firestore.collection(collection)
+                .document(eventId)
+                .set(updatedEvent.copy(id = eventId))
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteEvent(eventId: String): Result<Unit> {
+        return try {
+            firestore.collection(collection)
+                .document(eventId)
+                .delete()
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun clearEvents(): Result<Unit> {
         return try {
             val snapshot = firestore.collection(collection).get().await()
@@ -70,6 +94,104 @@ class EventRepositoryImpl(
             }
 
             batch.commit().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override fun getComments(eventId: String): Flow<List<Comment>> = callbackFlow {
+        val listenerRegistration = firestore.collection(collection)
+            .document(eventId)
+            .collection("comments")
+            .orderBy("createdAt", Query.Direction.ASCENDING)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    close(error)
+                    return@addSnapshotListener
+                }
+
+                val comments = snapshot?.toObjects(Comment::class.java) ?: emptyList()
+                trySend(comments)
+            }
+
+        awaitClose { listenerRegistration.remove() }
+    }
+
+    override suspend fun postComment(eventId: String, comment: Comment): Result<Unit> {
+        return try {
+            firestore.collection(collection)
+                .document(eventId)
+                .collection("comments")
+                .add(comment)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override fun getParticipantsCount(eventId: String): Flow<Int> = callbackFlow {
+        val listenerRegistration = firestore.collection("users")
+            .whereArrayContains("eventsJoined", eventId)
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(0)
+                    return@addSnapshotListener
+                }
+
+                trySend(snapshot?.size() ?: 0)
+            }
+
+        awaitClose { listenerRegistration.remove() }
+    }
+
+    override fun getCheckIns(eventId: String): Flow<CheckInData> = callbackFlow {
+        val listenerRegistration = firestore.collection(collection)
+            .document(eventId)
+            .collection("checkins")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    trySend(CheckInData(0, emptyList()))
+                    return@addSnapshotListener
+                }
+
+                val docs = snapshot?.documents ?: emptyList()
+                val userIds = docs.mapNotNull { it.getString("userId") }
+                trySend(CheckInData(docs.size, userIds))
+            }
+
+        awaitClose { listenerRegistration.remove() }
+    }
+
+    override suspend fun checkIn(eventId: String, userId: String): Result<Unit> {
+        return try {
+            val data = mapOf(
+                "userId" to userId,
+                "method" to "manual",
+                "timestamp" to System.currentTimeMillis()
+            )
+
+            firestore.collection(collection)
+                .document(eventId)
+                .collection("checkins")
+                .document(userId)
+                .set(data)
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun cancelCheckIn(eventId: String, userId: String): Result<Unit> {
+        return try {
+            firestore.collection(collection)
+                .document(eventId)
+                .collection("checkins")
+                .document(userId)
+                .delete()
+                .await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

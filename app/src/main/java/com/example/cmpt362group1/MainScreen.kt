@@ -71,9 +71,6 @@ fun FloatingActionButton(currentRoute: String, navController: NavHostController)
 
 @Composable
 fun MainScreen(
-    authViewModel: AuthViewModel = viewModel(),
-    eventViewModel: EventViewModel = viewModel(),
-    userViewModel: UserViewModel = viewModel(),
     navController: NavHostController = rememberNavController()
 ) {
     val defaultRoute: String = Route.Explore.route
@@ -99,8 +96,6 @@ fun MainScreen(
             ) {
                 composable(Route.Explore.route) {
                     MapStateHolder(
-                        eventViewModel = eventViewModel,
-                        userViewModel = userViewModel,
                         onEventSelected = { id ->
                             navController.navigate("${Route.EventDetail.route}/$id")
                         },
@@ -126,9 +121,6 @@ fun MainScreen(
 
                 composable(Route.Profile.route) {
                     ProfileScreen(
-                        authViewModel = authViewModel,
-                        userViewModel = userViewModel,
-                        eventViewModel = eventViewModel,
                         mainNavController = navController
                     )
                 }
@@ -138,9 +130,6 @@ fun MainScreen(
                         onExit = {
                             navController.popBackStack()
                         },
-                        eventViewModel = eventViewModel,
-                        userViewModel = userViewModel,
-                        authViewModel = authViewModel,
                     )
                 }
 
@@ -151,9 +140,6 @@ fun MainScreen(
                     EditEvent(
                         eventId = eventId,
                         onExit = { navController.popBackStack() },
-                        eventViewModel = eventViewModel,
-                        userViewModel = userViewModel,
-                        authViewModel = authViewModel
                     )
                 }
 
@@ -166,9 +152,6 @@ fun MainScreen(
 
                     EventDetailScreen(
                         eventId = eventId,
-                        eventViewModel = eventViewModel,
-                        userViewModel = userViewModel,
-                        authViewModel = authViewModel,
                         onNavigateBack = { navController.navigateUp() },
                         onEditEvent = { id ->
                             navController.navigate("${Route.EditEvent.route}/$id")
@@ -179,9 +162,6 @@ fun MainScreen(
 
                 composable(Route.SwipeDecider.route) {
                     SwipeEventsScreen(
-                        eventViewModel = eventViewModel,
-                        userViewModel = userViewModel,
-                        authViewModel = authViewModel,
                         onNavigateBack = { navController.popBackStack() },
                         onEventClick = { eventId ->
                             navController.navigate("${Route.EventDetail.route}/$eventId")

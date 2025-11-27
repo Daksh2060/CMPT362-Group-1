@@ -36,9 +36,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun CreateEvent(
     onExit: () -> Unit,
-    eventViewModel: EventViewModel,
-    userViewModel: UserViewModel,
-    authViewModel: AuthViewModel, // uid
+    eventViewModel: EventViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(), // uid
 ) {
     val uid = authViewModel.getUserId()!!
 
@@ -127,9 +127,8 @@ fun CreateEvent(
 fun EditEvent(
     eventId: String,
     onExit: () -> Unit,
-    eventViewModel: EventViewModel,
-    userViewModel: UserViewModel,
-    authViewModel: AuthViewModel,
+    eventViewModel: EventViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(),
 ) {
     val uid = authViewModel.getUserId() ?: return
 

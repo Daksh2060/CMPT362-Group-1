@@ -44,7 +44,6 @@ fun MapScreen(
     var weatherData by remember { mutableStateOf<WeatherResult?>(null) }
     var weatherError by remember { mutableStateOf<String?>(null) }
     val weatherRepository = remember { WeatherRepository() }
-    val coroutineScope = rememberCoroutineScope()
 
     val restrictedBounds = LatLngBounds(
         LatLng(49.15, -123.2),
@@ -93,12 +92,13 @@ fun MapScreen(
         properties = mapProperties
     ) {
         futureEvents.forEach { event ->
+            Log.d("MapScreen INFO", "${event.title} ${event.latitude} ${event.longitude}")
             if (event.latitude != null && event.longitude != null) {
                 val markerIcon = markerBitmap?.let { bitmap ->
                     try {
                         BitmapDescriptorFactory.fromBitmap(bitmap)
                     } catch (e: Exception) {
-                        Log.e("MapScreen", "Error creating BitmapDescriptor", e)
+                        Log.e("MapScreen INFO", "Error creating BitmapDescriptor", e)
                         null
                     }
                 }
