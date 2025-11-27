@@ -182,7 +182,7 @@ fun LocationPicker(
                 state = markerState,
                 title = "Event Location",
                 icon = markerIcon,
-                snippet = "Drag pin or tap map to adjust location",
+                snippet = "Hold and drag pin to adjust location.",
                 draggable = true
             )
         }

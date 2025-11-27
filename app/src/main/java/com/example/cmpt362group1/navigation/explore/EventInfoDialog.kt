@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,12 +15,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.DividerDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -37,7 +39,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cmpt362group1.R
 import com.example.cmpt362group1.database.Event
 import com.example.cmpt362group1.navigation.explore.weather.WeatherHelper
@@ -60,7 +61,9 @@ fun EventInfoDialog(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(16.dp)
+                .heightIn(max = 550.dp),
+
             shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(
                 containerColor = Color.White
@@ -83,106 +86,115 @@ fun EventInfoDialog(
                         text = event.title,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 20.sp,
-                        color = Color.Black
+                        color = Color.Black,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
                     SummarizeAndSpeakButton(event)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                InfoRow(label = "Location", value = event.location)
-                InfoRow(label = "Date", value = "${event.startDate} - ${event.endDate}")
-                InfoRow(label = "Time", value = "${event.startTime} - ${event.endTime}")
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    InfoRow(label = "Location", value = event.location)
+                    InfoRow(label = "Date", value = "${event.startDate} - ${event.endDate}")
+                    InfoRow(label = "Time", value = "${event.startTime} - ${event.endTime}")
 
-                if (event.description.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "Description",
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp,
-                        color = Color(0xFF444444)
+                    if (event.description.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "Description",
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp,
+                            color = Color(0xFF444444)
+                        )
+                        Text(
+                            text = event.description,
+                            fontSize = 15.sp,
+                            color = Color.Black
+                        )
+                    }
+
+                    if (event.dressCode.isNotEmpty()) {
+                        InfoRow(label = "Dress Code", value = event.dressCode)
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(
+                        Modifier,
+                        DividerDefaults.Thickness,
+                        color = Color(0xFFE0E0E0)
                     )
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     Text(
-                        text = event.description,
-                        fontSize = 15.sp,
+                        text = "Expected Weather",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp,
                         color = Color.Black
                     )
-                }
 
-                if (event.dressCode.isNotEmpty()) {
-                    InfoRow(label = "Dress Code", value = event.dressCode)
-                }
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
-                Divider(color = Color(0xFFE0E0E0))
-                Spacer(modifier = Modifier.height(16.dp))
+                    when {
+                        weatherData != null -> {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "${weatherData.temperature.toInt()}°C",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 24.sp,
+                                    color = Color.Black
+                                )
 
-                Text(
-                    text = "Expected Weather",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                    color = Color.Black
-                )
+                                val symbol = WeatherHelper.getWeatherSymbol(weatherData.condition.lowercase())
 
-                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = symbol,
+                                    fontSize = 24.sp
+                                )
 
-                when {
-                    weatherData != null -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-
-                            Text(
-                                text = "${weatherData.temperature.toInt()}°C",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp,
-                                color = Color.Black
-                            )
-
-                            val symbol = WeatherHelper.getWeatherSymbol(weatherData.condition.lowercase())
-
-                            Text(
-                                text = symbol,
-                                fontSize = 24.sp
-                            )
-
-                            // Condition text
-                            Text(
-                                text = weatherData.condition,
-                                fontSize = 16.sp,
-                                color = Color(0xFF555555)
-                            )
+                                Text(
+                                    text = weatherData.condition,
+                                    fontSize = 16.sp,
+                                    color = Color(0xFF555555)
+                                )
+                            }
                         }
-                    }
 
-                    weatherError != null -> {
-                        Text(
-                            text = "Weather data unavailable",
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.Red
-                        )
-                        Text(
-                            text = weatherError,
-                            fontSize = 13.sp,
-                            color = Color.Gray
-                        )
-                    }
-
-                    else -> {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp
+                        weatherError != null -> {
+                            Text(
+                                text = "Weather not yet available.",
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.Red
                             )
                             Text(
-                                text = "Loading weather...",
+                                text = weatherError,
                                 fontSize = 13.sp,
                                 color = Color.Gray
                             )
+                        }
+
+                        else -> {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(20.dp),
+                                    strokeWidth = 2.dp
+                                )
+                                Text(
+                                    text = "Loading weather...",
+                                    fontSize = 13.sp,
+                                    color = Color.Gray
+                                )
+                            }
                         }
                     }
                 }
@@ -240,7 +252,6 @@ fun EventInfoDialog(
                         )
                     }
                 }
-
             }
         }
     }

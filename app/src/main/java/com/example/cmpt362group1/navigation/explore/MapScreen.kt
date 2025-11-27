@@ -59,8 +59,6 @@ fun MapScreen(
         )
     }
 
-
-
     val mapProperties = remember {
         MapProperties(
             latLngBoundsForCameraTarget = restrictedBounds,
@@ -79,7 +77,8 @@ fun MapScreen(
                 context.resources,
                 R.drawable.event_marker
             )
-            bitmap?.scale(100, 100, false)
+            bitmap?.scale(120, 120, false)
+
         } catch (e: Exception) {
             Log.e("MapScreen", "Error loading PNG marker icon", e)
             null
