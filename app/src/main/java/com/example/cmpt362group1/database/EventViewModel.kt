@@ -104,13 +104,10 @@ class EventViewModel(
             if (result.isSuccess) {
                 val eventId = result.getOrNull()!!
 
-                onSuccess(eventId)
                 _operationState.value = OperationUiState.Success("Event saved successfully")
                 Log.d("EventViewModel", "Event saved with ID: $eventId")
 
-                if (eventId != null) {
-                    onSuccess(eventId)
-                }
+                onSuccess(eventId)
             } else {
                 val error = result.exceptionOrNull()
                 _operationState.value = OperationUiState.Error(
