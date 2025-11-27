@@ -8,4 +8,5 @@ sealed class Route(val route: String) {
     object CreateEvent : Route("create_event")
     object EventDetail : Route("event_detail")
     object EditEvent : Route("edit_event")
+    object SwipeDecider : Route("swipe_decider")
 }

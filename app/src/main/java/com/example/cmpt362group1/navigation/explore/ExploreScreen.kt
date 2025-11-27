@@ -5,15 +5,22 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,11 +31,13 @@ import com.example.cmpt362group1.database.UserViewModel
 import com.example.cmpt362group1.widget.WidgetUpdater
 import com.google.android.gms.maps.model.LatLng
 
+
 @Composable
 fun MapStateHolder(
     eventViewModel: EventViewModel,
     userViewModel: UserViewModel,
-    onEventSelected: (String) -> Unit
+    onEventSelected: (String) -> Unit,
+    onOpenSwipeDecider: () -> Unit = {}
 ) {
     val sfuLocations = listOf(
         CampusLocation("Burnaby", LatLng(49.279161057278586, -122.91807989898375), zoom = 15f),
@@ -63,19 +72,42 @@ fun MapStateHolder(
             onEventSelected = onEventSelected
         )
 
-        SegmentFloatingBar(
-            items = cityNames,
-            initialSelectedItem = cityNames.first(),
-            onItemSelected = { newCityName ->
-                selectedLocation = sfuLocations.first { it.name == newCityName }
-            },
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .wrapContentHeight()
                 .align(Alignment.TopCenter)
-                .padding(top = 12.dp)
-        )
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            SegmentFloatingBar(
+                items = cityNames,
+                initialSelectedItem = cityNames.first(),
+                onItemSelected = { newCityName ->
+                    selectedLocation = sfuLocations.first { it.name == newCityName }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+            )
+
+            Button(
+                onClick = onOpenSwipeDecider,
+                modifier = Modifier
+                    .align(Alignment.Start)
+                    .shadow(elevation = 6.dp, shape = RoundedCornerShape(12.dp)),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color.Black
+                ),
+                shape = RoundedCornerShape(12.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+            ) {
+                Text(
+                    text = "Swipe to Decide",
+                    fontWeight = FontWeight.SemiBold,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
     }
 }
 

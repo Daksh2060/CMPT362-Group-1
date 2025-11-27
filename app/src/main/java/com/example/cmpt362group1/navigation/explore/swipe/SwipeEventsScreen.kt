@@ -1,0 +1,414 @@
+package com.example.cmpt362group1.navigation.explore.swipe
+
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.example.cmpt362group1.auth.AuthViewModel
+import com.example.cmpt362group1.database.Event
+import com.example.cmpt362group1.database.EventViewModel
+import com.example.cmpt362group1.database.UserUiState
+import com.example.cmpt362group1.database.UserViewModel
+import com.example.cmpt362group1.navigation.explore.startDateTime
+import kotlinx.coroutines.launch
+import java.util.Date
+import kotlin.math.roundToInt
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SwipeEventsScreen(
+    eventViewModel: EventViewModel,
+    userViewModel: UserViewModel,
+    authViewModel: AuthViewModel,
+    onNavigateBack: () -> Unit
+) {
+    val eventsState by eventViewModel.eventsState.collectAsState()
+    val userState by userViewModel.userState.collectAsState()
+
+    // 本地记录跳过的ID
+    var skippedEventIds by remember { mutableStateOf(setOf<String>()) }
+
+    LaunchedEffect(Unit) {
+        val uid = authViewModel.getUserId()
+        if (uid != null) {
+            userViewModel.loadUser(uid)
+        }
+    }
+
+    val joinedIds: List<String> = (userState as? UserUiState.Success)?.user?.eventsJoined ?: emptyList()
+
+    val allEvents: List<Event> = when (val state = eventsState) {
+        is EventViewModel.EventsUiState.Success -> state.events
+        else -> emptyList()
+    }
+
+    val candidateEvents by remember(allEvents, joinedIds, skippedEventIds) {
+        derivedStateOf {
+            val now = Date()
+            allEvents.filter { event ->
+                event.startDateTime() > now &&
+                        !joinedIds.contains(event.id) &&
+                        !skippedEventIds.contains(event.id)
+            }
+        }
+    }
+
+    val currentEvent = candidateEvents.firstOrNull()
+    val nextEvent = candidateEvents.getOrNull(1)
+
+    // 使用浅灰色背景，突出白色卡片
+    Scaffold(
+        containerColor = Color(0xFFF5F5F5),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "Discover",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.Black
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color.Black
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFF5F5F5) // 保持顶部栏和背景一致，看起来更干净
+                )
+            )
+        }
+    ) { innerPadding ->
+        // 关键调整：Box 不再 fillMaxSize 直接贴边，而是留出空间
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(top = 16.dp, bottom = 32.dp), // 上下留白，防止遮挡
+            contentAlignment = Alignment.Center
+        ) {
+            when {
+                eventsState is EventViewModel.EventsUiState.Loading ->
+                    CircularProgressIndicator(color = Color.Black)
+
+                currentEvent == null -> {
+                    EmptyStateContent(onNavigateBack)
+                }
+
+                else -> {
+                    // 下一张卡片（垫底背景）
+                    if (nextEvent != null) {
+                        StaticEventCard(
+                            event = nextEvent,
+                            // 让背景卡片稍微小一点、暗一点，制造景深感
+                            modifier = Modifier
+                                .fillMaxWidth(0.85f) // 比主卡片窄
+                                .aspectRatio(0.7f)   // 保持比例
+                                .offset(y = 12.dp)   // 稍微下移
+                                .alpha(0.6f)         // 半透明
+                        )
+                    }
+
+                    // 当前卡片
+                    key(currentEvent.id) {
+                        DraggableEventCard(
+                            event = currentEvent,
+                            onJoin = {
+                                val uid = authViewModel.getUserId()
+                                if (uid != null) {
+                                    userViewModel.addJoinedEvent(uid, currentEvent.id)
+                                }
+                            },
+                            onSkip = {
+                                skippedEventIds = skippedEventIds + currentEvent.id
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DraggableEventCard(
+    event: Event,
+    onJoin: () -> Unit,
+    onSkip: () -> Unit
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val offsetX = remember { Animatable(0f) }
+    val swipeThreshold = 300f
+
+    val rotation by remember { derivedStateOf { offsetX.value / 25f } }
+    val joinAlpha by remember { derivedStateOf { (offsetX.value / swipeThreshold).coerceIn(0f, 1f) } }
+    val skipAlpha by remember { derivedStateOf { (-offsetX.value / swipeThreshold).coerceIn(0f, 1f) } }
+
+    // 这里控制卡片的具体尺寸
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(0.9f) // 宽度占屏幕 90%
+            .aspectRatio(0.7f)  // 高宽比 0.7，保证是长方形但不会太长
+            .offset { IntOffset(offsetX.value.roundToInt(), 0) }
+            .rotate(rotation)
+            .pointerInput(Unit) {
+                detectDragGestures(
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        coroutineScope.launch {
+                            offsetX.snapTo(offsetX.value + dragAmount.x)
+                        }
+                    },
+                    onDragEnd = {
+                        coroutineScope.launch {
+                            when {
+                                offsetX.value > swipeThreshold -> {
+                                    offsetX.animateTo(1500f, tween(300))
+                                    onJoin()
+                                }
+                                offsetX.value < -swipeThreshold -> {
+                                    offsetX.animateTo(-1500f, tween(300))
+                                    onSkip()
+                                }
+                                else -> {
+                                    offsetX.animateTo(0f, spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow))
+                                }
+                            }
+                        }
+                    }
+                )
+            }
+    ) {
+        StaticEventCard(event = event, modifier = Modifier.fillMaxSize())
+
+        // 覆盖层：LIKE (黑底白勾，更酷一点)
+        if (joinAlpha > 0) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = joinAlpha * 0.1f)), // 背景稍微变暗
+                contentAlignment = Alignment.Center
+            ) {
+                // 只有图标变色，不用大色块背景
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = "Join",
+                    tint = Color(0xFF4CAF50).copy(alpha = joinAlpha), // 绿色稍微保留一点语义
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(Color.White.copy(alpha = 0.9f), CircleShape) // 白色圆底
+                        .padding(20.dp)
+                )
+            }
+        }
+
+        // 覆盖层：NOPE
+        if (skipAlpha > 0) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(Color.Black.copy(alpha = skipAlpha * 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Skip",
+                    tint = Color(0xFFE53935).copy(alpha = skipAlpha),
+                    modifier = Modifier
+                        .size(100.dp)
+                        .background(Color.White.copy(alpha = 0.9f), CircleShape)
+                        .padding(20.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun StaticEventCard(
+    event: Event,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier
+            .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp), spotColor = Color.Gray.copy(alpha = 0.5f)),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.fillMaxSize()) {
+                // 图片区域：占 65%
+                Box(
+                    modifier = Modifier
+                        .weight(0.65f)
+                        .fillMaxWidth()
+                        .background(Color(0xFFEEEEEE)) // 图片加载前的浅灰底色
+                ) {
+                    if (event.imageUrl.isNotBlank()) {
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(event.imageUrl)
+                                .crossfade(true)
+                                .build(),
+                            contentDescription = event.title,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                }
+
+                // 信息区域：占 35%
+                Column(
+                    modifier = Modifier
+                        .weight(0.35f)
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.SpaceBetween // 内容上下撑开
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(
+                            text = event.title,
+                            style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        // 地点行
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.LocationOn,
+                                contentDescription = null,
+                                tint = Color.Gray,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = event.location,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                                maxLines = 1
+                            )
+                        }
+                    }
+
+                    // 时间和简述
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Outlined.DateRange,
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = "${event.startDate} • ${event.startTime}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.Black
+                            )
+                        }
+
+                        if (event.description.isNotBlank()) {
+                            Text(
+                                text = event.description,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.DarkGray,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyStateContent(onNavigateBack: () -> Unit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(32.dp)
+    ) {
+        // 使用黑色圆圈勾勒
+        Icon(
+            imageVector = Icons.Default.Check,
+            contentDescription = null,
+            modifier = Modifier
+                .size(80.dp)
+                .background(Color.Gray, CircleShape) // 黑色背景
+                .padding(16.dp),
+            tint = Color.White // 白色钩子
+        )
+        Spacer(Modifier.height(24.dp))
+        Text(
+            text = "You're all caught up!",
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = Color.Black
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "There are no more events to swipe right now.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Spacer(Modifier.height(32.dp))
+
+        // 按钮风格完全复刻 EventDetailScreen (黑底白字)
+        Button(
+            onClick = onNavigateBack,
+            modifier = Modifier
+                .fillMaxWidth(0.6f)
+                .height(50.dp),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Black,
+                contentColor = Color.White
+            )
+        ) {
+            Text("Back to Explore", fontWeight = FontWeight.Bold)
+        }
+    }
+}
