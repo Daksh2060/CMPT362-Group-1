@@ -182,7 +182,10 @@ fun MainScreen(
                         eventViewModel = eventViewModel,
                         userViewModel = userViewModel,
                         authViewModel = authViewModel,
-                        onNavigateBack = { navController.popBackStack() }
+                        onNavigateBack = { navController.popBackStack() },
+                        onEventClick = { eventId ->
+                            navController.navigate("${Route.EventDetail.route}/$eventId")
+                        }
                     )
                 }
             }
