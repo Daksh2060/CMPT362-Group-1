@@ -94,7 +94,7 @@ fun CreateEventLocation(
         floatingActionButtonPosition = FabPosition.Start,
         floatingActionButton = {
             Fab(
-                label = "Create",
+                label = "Confirm",
                 icon = Icons.Default.CheckCircle,
                 onClick = { onConfirm(selectedLat, selectedLng) }
             )
