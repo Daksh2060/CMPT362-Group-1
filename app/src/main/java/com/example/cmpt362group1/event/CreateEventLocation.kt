@@ -1,7 +1,6 @@
 package com.example.cmpt362group1.event
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.foundation.layout.Box
@@ -20,10 +19,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.graphics.scale
@@ -89,7 +90,7 @@ fun CreateEventLocation(
             ) {
                 LocationPicker(
                     modifier = Modifier.fillMaxSize(),
-                    selectedLocation = LatLng(selectedLat, selectedLng),
+                    currentLocation = LatLng(selectedLat, selectedLng),
                     onLocationSelected = { latLng ->
                         selectedLat = latLng.latitude
                         selectedLng = latLng.longitude
@@ -103,21 +104,27 @@ fun CreateEventLocation(
 @Composable
 fun LocationPicker(
     modifier: Modifier = Modifier,
-    selectedLocation: LatLng,
+    currentLocation: LatLng,
     onLocationSelected: (LatLng) -> Unit
 ) {
     val context: Context = LocalContext.current
 
-    var markerState by remember { mutableStateOf(MarkerState(position = selectedLocation)) }
-
-    val restrictedBounds = LatLngBounds(
-        LatLng(49.15, -123.2),
-        LatLng(49.35, -122.8)
-    )
+    var markerState by remember { mutableStateOf(MarkerState(position = currentLocation)) }
+    LaunchedEffect(markerState.position) { // observe marker position changes from dragging
+        snapshotFlow { markerState.position }
+            .collect { position ->
+                if (position != currentLocation) {
+                    onLocationSelected(position)
+                }
+            }
+    }
 
     val mapProperties = remember {
         MapProperties(
-            latLngBoundsForCameraTarget = restrictedBounds,
+            latLngBoundsForCameraTarget = LatLngBounds(
+                LatLng(49.15, -123.2),
+                LatLng(49.35, -122.8)
+            ),
             minZoomPreference = 10.0f
         )
     }
@@ -145,10 +152,6 @@ fun LocationPicker(
         modifier = modifier,
         properties = mapProperties,
         cameraPositionState = cameraPositionState,
-        onMapClick = { latLng ->
-            onLocationSelected(latLng)
-        },
-
     ) {
         Marker(
             state = markerState,
