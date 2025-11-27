@@ -602,7 +602,7 @@ fun WeatherInfoPanel(
             }
             weatherError != null -> {
                 Text(
-                    text = "Weather data unavailable",
+                    text = "Weather not yet available.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error
                 )

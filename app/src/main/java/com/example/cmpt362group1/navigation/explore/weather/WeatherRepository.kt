@@ -27,7 +27,7 @@ class WeatherRepository {
 
                 val weather = response.body()
                 if (weather == null || weather.hourly == null) {
-                    onError("No weather data available.")
+                    onError("Weather not yet available.")
                     return
                 }
 
@@ -35,7 +35,7 @@ class WeatherRepository {
                 val index = hourly.time.indexOf(dateTime)
 
                 if (index < 0 || index >= hourly.temperature_2m.size || index >= hourly.weathercode.size) {
-                    onError("No matching weather data for $dateTime")
+                    onError("Check again closer to start date.")
                     return
                 }
 
