@@ -1,14 +1,8 @@
 package com.example.cmpt362group1.database
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,14 +11,7 @@ import kotlinx.coroutines.launch
 
 class EventViewModel(
     private val repository: EventRepository = EventRepositoryImpl(),
-    private val context: Context
 ) : ViewModel() {
-
-    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
-
-    private var commentsListener: ListenerRegistration? = null
-    private var participantsListener: ListenerRegistration? = null
-    private var checkInListener: ListenerRegistration? = null
 
     private val _eventsState = MutableStateFlow<EventsUiState>(EventsUiState.Loading)
     val eventsState: StateFlow<EventsUiState> = _eventsState.asStateFlow()
@@ -125,23 +112,24 @@ class EventViewModel(
         onSuccess: () -> Unit = {},
         onError: (Throwable?) -> Unit = {}
     ) {
-        _operationState.value = OperationUiState.Loading
+        viewModelScope.launch {
+            _operationState.value = OperationUiState.Loading
 
-        db.collection("events")
-            .document(eventId)
-            .set(updatedEvent.copy(id = eventId))
-            .addOnSuccessListener {
+            val result = repository.updateEvent(eventId, updatedEvent)
+
+            if (result.isSuccess) {
                 Log.d("EventViewModel", "Event updated: $eventId")
                 _operationState.value =
                     OperationUiState.Success("Event updated successfully")
                 onSuccess()
-            }
-            .addOnFailureListener { e ->
-                Log.e("EventViewModel", "Failed to update event", e)
+            } else {
+                val error = result.exceptionOrNull()
+                Log.e("EventViewModel", "Failed to update event", error)
                 _operationState.value =
-                    OperationUiState.Error(e.message ?: "Failed to update event")
-                onError(e)
+                    OperationUiState.Error(error?.message ?: "Failed to update event")
+                onError(error)
             }
+        }
     }
 
 
@@ -179,29 +167,19 @@ class EventViewModel(
     }
 
     fun startComments(eventId: String) {
-        _commentsState.value = CommentsUiState.Loading
+        viewModelScope.launch {
+            _commentsState.value = CommentsUiState.Loading
 
-        commentsListener?.remove()
-        commentsListener = db.collection("events")
-            .document(eventId)
-            .collection("comments")
-            .orderBy("createdAt", Query.Direction.ASCENDING)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.e("EventViewModel", "Error listening comments", error)
+            repository.getComments(eventId)
+                .catch { e ->
+                    Log.e("EventViewModel", "Error listening comments", e)
                     _commentsState.value =
-                        CommentsUiState.Error(error.message ?: "Failed to load comments")
-                    return@addSnapshotListener
+                        CommentsUiState.Error(e.message ?: "Failed to load comments")
                 }
-
-                if (snapshot == null) {
-                    _commentsState.value = CommentsUiState.Success(emptyList())
-                    return@addSnapshotListener
+                .collect { comments ->
+                    _commentsState.value = CommentsUiState.Success(comments)
                 }
-
-                val comments = snapshot.toObjects(Comment::class.java)
-                _commentsState.value = CommentsUiState.Success(comments)
-            }
+        }
     }
 
     fun postComment(
@@ -211,134 +189,109 @@ class EventViewModel(
         text: String,
         parentId: String? = null
     ) {
-        val trimmed = text.trim()
-        if (trimmed.isEmpty()) return
+        viewModelScope.launch {
+            val trimmed = text.trim()
+            if (trimmed.isEmpty()) return@launch
 
-        val comment = Comment(
-            eventId = eventId,
-            userId = userId,
-            userName = userName,
-            text = trimmed,
-            parentId = parentId
-        )
+            val comment = Comment(
+                eventId = eventId,
+                userId = userId,
+                userName = userName,
+                text = trimmed,
+                parentId = parentId
+            )
 
-        db.collection("events")
-            .document(eventId)
-            .collection("comments")
-            .add(comment)
-            .addOnSuccessListener {
+            val result = repository.postComment(eventId, comment)
+
+            if (result.isSuccess) {
                 Log.d("EventViewModel", "Comment added")
+            } else {
+                Log.e("EventViewModel", "Failed to add comment", result.exceptionOrNull())
             }
-            .addOnFailureListener { e ->
-                Log.e("EventViewModel", "Failed to add comment", e)
-            }
+        }
     }
 
     fun startParticipants(eventId: String) {
-        participantsListener?.remove()
-        participantsListener = db.collection("users")
-            .whereArrayContains("eventsJoined", eventId)
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.e("EventViewModel", "Error listening participants", error)
+        viewModelScope.launch {
+            repository.getParticipantsCount(eventId)
+                .catch { e ->
+                    Log.e("EventViewModel", "Error listening participants", e)
                     _participantsCount.value = 0
-                    return@addSnapshotListener
                 }
-
-                _participantsCount.value = snapshot?.size() ?: 0
-            }
+                .collect { count ->
+                    _participantsCount.value = count
+                }
+        }
     }
 
     fun startCheckIns(eventId: String, currentUserId: String?) {
-        checkInListener?.remove()
+        viewModelScope.launch {
+            _arrivedCount.value = 0
+            _isCurrentUserCheckedIn.value = false
 
-        _arrivedCount.value = 0
-        _isCurrentUserCheckedIn.value = false
-
-        checkInListener = db.collection("events")
-            .document(eventId)
-            .collection("checkins")
-            .addSnapshotListener { snapshot, error ->
-                if (error != null) {
-                    Log.e("EventViewModel", "Error listening check-ins", error)
+            repository.getCheckIns(eventId)
+                .catch { e ->
+                    Log.e("EventViewModel", "Error listening check-ins", e)
                     _arrivedCount.value = 0
                     _isCurrentUserCheckedIn.value = false
-                    return@addSnapshotListener
                 }
+                .collect { checkInData ->
+                    _arrivedCount.value = checkInData.count
 
-                val docs = snapshot?.documents ?: emptyList()
-                _arrivedCount.value = docs.size
-
-                if (currentUserId != null) {
-                    _isCurrentUserCheckedIn.value =
-                        docs.any { it.getString("userId") == currentUserId }
-                } else {
-                    _isCurrentUserCheckedIn.value = false
+                    if (currentUserId != null) {
+                        _isCurrentUserCheckedIn.value = checkInData.userIds.contains(currentUserId)
+                    } else {
+                        _isCurrentUserCheckedIn.value = false
+                    }
                 }
-            }
+        }
     }
 
     fun manualCheckIn(eventId: String, userId: String) {
-        val data = mapOf(
-            "userId" to userId,
-            "method" to "manual",
-            "timestamp" to System.currentTimeMillis()
-        )
+        viewModelScope.launch {
+            val result = repository.checkIn(eventId, userId)
 
-        db.collection("events")
-            .document(eventId)
-            .collection("checkins")
-            .document(userId)
-            .set(data)
-            .addOnSuccessListener {
+            if (result.isSuccess) {
                 Log.d("EventViewModel", "Manual check-in success")
+            } else {
+                Log.e("EventViewModel", "Manual check-in failed", result.exceptionOrNull())
             }
-            .addOnFailureListener { e ->
-                Log.e("EventViewModel", "Manual check-in failed", e)
-            }
+        }
     }
 
     fun cancelManualCheckIn(eventId: String, userId: String) {
-        db.collection("events")
-            .document(eventId)
-            .collection("checkins")
-            .document(userId)
-            .delete()
-            .addOnSuccessListener {
+        viewModelScope.launch {
+            val result = repository.cancelCheckIn(eventId, userId)
+
+            if (result.isSuccess) {
                 Log.d("EventViewModel", "Manual check-in cancelled")
+            } else {
+                Log.e("EventViewModel", "Cancel manual check-in failed", result.exceptionOrNull())
             }
-            .addOnFailureListener { e ->
-                Log.e("EventViewModel", "Cancel manual check-in failed", e)
-            }
+        }
     }
 
     fun deleteEvent(
         eventId: String,
         onResult: (Boolean) -> Unit = {}
     ) {
-        _operationState.value = OperationUiState.Loading
+        viewModelScope.launch {
+            _operationState.value = OperationUiState.Loading
 
-        db.collection("events")
-            .document(eventId)
-            .delete()
-            .addOnSuccessListener {
+            val result = repository.deleteEvent(eventId)
+
+            if (result.isSuccess) {
                 Log.d("EventViewModel", "Event deleted: $eventId")
                 _operationState.value = OperationUiState.Success("Event deleted")
                 onResult(true)
-            }
-            .addOnFailureListener { e ->
-                Log.e("EventViewModel", "Failed to delete event", e)
+            } else {
+                val error = result.exceptionOrNull()
+                Log.e("EventViewModel", "Failed to delete event", error)
                 _operationState.value =
-                    OperationUiState.Error(e.message ?: "Failed to delete event")
+                    OperationUiState.Error(error?.message ?: "Failed to delete event")
                 onResult(false)
             }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        commentsListener?.remove()
-        participantsListener?.remove()
-        checkInListener?.remove()
+        }
     }
 
     sealed class EventsUiState {

@@ -11,5 +11,26 @@ interface EventRepository {
 
     suspend fun addEvent(event: Event): Result<String>
 
+    suspend fun updateEvent(eventId: String, updatedEvent: Event): Result<Unit>
+
+    suspend fun deleteEvent(eventId: String): Result<Unit>
+
     suspend fun clearEvents(): Result<Unit>
+
+    fun getComments(eventId: String): Flow<List<Comment>>
+
+    suspend fun postComment(eventId: String, comment: Comment): Result<Unit>
+
+    fun getParticipantsCount(eventId: String): Flow<Int>
+
+    fun getCheckIns(eventId: String): Flow<CheckInData>
+
+    suspend fun checkIn(eventId: String, userId: String): Result<Unit>
+
+    suspend fun cancelCheckIn(eventId: String, userId: String): Result<Unit>
 }
+
+data class CheckInData(
+    val count: Int,
+    val userIds: List<String>
+)

@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cmpt362group1.database.Event
 import com.example.cmpt362group1.database.EventViewModel
 import com.example.cmpt362group1.database.UserViewModel
@@ -34,10 +35,10 @@ import com.google.android.gms.maps.model.LatLng
 
 @Composable
 fun MapStateHolder(
-    eventViewModel: EventViewModel,
-    userViewModel: UserViewModel,
     onEventSelected: (String) -> Unit,
-    onOpenSwipeDecider: () -> Unit = {}
+    onOpenSwipeDecider: () -> Unit = {},
+    eventViewModel: EventViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel(),
 ) {
     val sfuLocations = listOf(
         CampusLocation("Burnaby", LatLng(49.279161057278586, -122.91807989898375), zoom = 15f),

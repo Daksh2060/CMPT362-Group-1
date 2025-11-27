@@ -36,6 +36,7 @@ import com.example.cmpt362group1.database.UserUiState
 import com.example.cmpt362group1.database.UserViewModel
 import androidx.compose.ui.unit.times
 import androidx.core.net.toUri
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cmpt362group1.Route
 
 
@@ -57,10 +58,9 @@ private fun StatBlock(label: String, value: Int) {
 
 @Composable
 fun ProfileScreen(
-    authViewModel: AuthViewModel,
-    userViewModel: UserViewModel,
-    eventViewModel: EventViewModel,
-    mainNavController: NavHostController
+    mainNavController: NavHostController,
+    authViewModel: AuthViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel(),
 ) {
     val navController = rememberNavController()
 
@@ -97,9 +97,7 @@ fun ProfileScreen(
             ProfileView(
                 navController = navController,
                 mainNavController = mainNavController,
-                authViewModel = authViewModel,
                 userProfile = userProfile,
-                eventViewModel = eventViewModel
             )
         }
         composable("edit_profile") {
@@ -112,9 +110,9 @@ fun ProfileScreen(
 fun ProfileView(
     navController: NavHostController,
     mainNavController: NavHostController, // for event details
-    authViewModel: AuthViewModel,
     userProfile: User,
-    eventViewModel: EventViewModel
+    eventViewModel: EventViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(),
 ) {
     val context = LocalContext.current
     val pastEventsIds = userProfile.eventsJoined

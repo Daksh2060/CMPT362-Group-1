@@ -147,7 +147,8 @@ fun LocationPicker(
         cameraPositionState = cameraPositionState,
         onMapClick = { latLng ->
             onLocationSelected(latLng)
-        }
+        },
+
     ) {
         Marker(
             state = markerState,

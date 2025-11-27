@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.cmpt362group1.auth.AuthViewModel
@@ -50,11 +51,11 @@ import kotlin.math.roundToInt
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SwipeEventsScreen(
-    eventViewModel: EventViewModel,
-    userViewModel: UserViewModel,
-    authViewModel: AuthViewModel,
     onNavigateBack: () -> Unit,
-    onEventClick: (String) -> Unit
+    onEventClick: (String) -> Unit,
+    eventViewModel: EventViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel(),
+    authViewModel: AuthViewModel = viewModel(),
 ) {
     val eventsState by eventViewModel.eventsState.collectAsState()
     val userState by userViewModel.userState.collectAsState()
