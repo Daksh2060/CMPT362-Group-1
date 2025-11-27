@@ -53,7 +53,6 @@ fun SwipeEventsScreen(
     val eventsState by eventViewModel.eventsState.collectAsState()
     val userState by userViewModel.userState.collectAsState()
 
-    // 本地记录跳过的ID
     var skippedEventIds by remember { mutableStateOf(setOf<String>()) }
 
     LaunchedEffect(Unit) {
@@ -84,7 +83,6 @@ fun SwipeEventsScreen(
     val currentEvent = candidateEvents.firstOrNull()
     val nextEvent = candidateEvents.getOrNull(1)
 
-    // 使用浅灰色背景，突出白色卡片
     Scaffold(
         containerColor = Color(0xFFF5F5F5),
         topBar = {
@@ -107,17 +105,16 @@ fun SwipeEventsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFFF5F5F5) // 保持顶部栏和背景一致，看起来更干净
+                    containerColor = Color(0xFFF5F5F5)
                 )
             )
         }
     ) { innerPadding ->
-        // 关键调整：Box 不再 fillMaxSize 直接贴边，而是留出空间
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(top = 16.dp, bottom = 32.dp), // 上下留白，防止遮挡
+                .padding(top = 16.dp, bottom = 32.dp),
             contentAlignment = Alignment.Center
         ) {
             when {
@@ -129,20 +126,17 @@ fun SwipeEventsScreen(
                 }
 
                 else -> {
-                    // 下一张卡片（垫底背景）
                     if (nextEvent != null) {
                         StaticEventCard(
                             event = nextEvent,
-                            // 让背景卡片稍微小一点、暗一点，制造景深感
                             modifier = Modifier
-                                .fillMaxWidth(0.85f) // 比主卡片窄
-                                .aspectRatio(0.7f)   // 保持比例
-                                .offset(y = 12.dp)   // 稍微下移
-                                .alpha(0.6f)         // 半透明
+                                .fillMaxWidth(0.85f)
+                                .aspectRatio(0.7f)
+                                .offset(y = 12.dp)
+                                .alpha(0.6f)
                         )
                     }
 
-                    // 当前卡片
                     key(currentEvent.id) {
                         DraggableEventCard(
                             event = currentEvent,
@@ -177,11 +171,10 @@ private fun DraggableEventCard(
     val joinAlpha by remember { derivedStateOf { (offsetX.value / swipeThreshold).coerceIn(0f, 1f) } }
     val skipAlpha by remember { derivedStateOf { (-offsetX.value / swipeThreshold).coerceIn(0f, 1f) } }
 
-    // 这里控制卡片的具体尺寸
     Box(
         modifier = Modifier
-            .fillMaxWidth(0.9f) // 宽度占屏幕 90%
-            .aspectRatio(0.7f)  // 高宽比 0.7，保证是长方形但不会太长
+            .fillMaxWidth(0.9f)
+            .aspectRatio(0.7f)
             .offset { IntOffset(offsetX.value.roundToInt(), 0) }
             .rotate(rotation)
             .pointerInput(Unit) {
@@ -214,29 +207,26 @@ private fun DraggableEventCard(
     ) {
         StaticEventCard(event = event, modifier = Modifier.fillMaxSize())
 
-        // 覆盖层：LIKE (黑底白勾，更酷一点)
         if (joinAlpha > 0) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
                     .clip(RoundedCornerShape(24.dp))
-                    .background(Color.Black.copy(alpha = joinAlpha * 0.1f)), // 背景稍微变暗
+                    .background(Color.Black.copy(alpha = joinAlpha * 0.1f)),
                 contentAlignment = Alignment.Center
             ) {
-                // 只有图标变色，不用大色块背景
                 Icon(
                     imageVector = Icons.Default.Check,
                     contentDescription = "Join",
-                    tint = Color(0xFF4CAF50).copy(alpha = joinAlpha), // 绿色稍微保留一点语义
+                    tint = Color(0xFF4CAF50).copy(alpha = joinAlpha),
                     modifier = Modifier
                         .size(100.dp)
-                        .background(Color.White.copy(alpha = 0.9f), CircleShape) // 白色圆底
+                        .background(Color.White.copy(alpha = 0.9f), CircleShape)
                         .padding(20.dp)
                 )
             }
         }
 
-        // 覆盖层：NOPE
         if (skipAlpha > 0) {
             Box(
                 modifier = Modifier
@@ -273,12 +263,11 @@ private fun StaticEventCard(
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.fillMaxSize()) {
-                // 图片区域：占 65%
                 Box(
                     modifier = Modifier
                         .weight(0.65f)
                         .fillMaxWidth()
-                        .background(Color(0xFFEEEEEE)) // 图片加载前的浅灰底色
+                        .background(Color(0xFFEEEEEE))
                 ) {
                     if (event.imageUrl.isNotBlank()) {
                         AsyncImage(
@@ -293,13 +282,12 @@ private fun StaticEventCard(
                     }
                 }
 
-                // 信息区域：占 35%
                 Column(
                     modifier = Modifier
                         .weight(0.35f)
                         .fillMaxWidth()
                         .padding(20.dp),
-                    verticalArrangement = Arrangement.SpaceBetween // 内容上下撑开
+                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Text(
@@ -311,7 +299,6 @@ private fun StaticEventCard(
                             overflow = TextOverflow.Ellipsis
                         )
 
-                        // 地点行
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.LocationOn,
@@ -329,7 +316,6 @@ private fun StaticEventCard(
                         }
                     }
 
-                    // 时间和简述
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
@@ -370,15 +356,14 @@ private fun EmptyStateContent(onNavigateBack: () -> Unit) {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.padding(32.dp)
     ) {
-        // 使用黑色圆圈勾勒
         Icon(
             imageVector = Icons.Default.Check,
             contentDescription = null,
             modifier = Modifier
                 .size(80.dp)
-                .background(Color.Gray, CircleShape) // 黑色背景
+                .background(Color.Gray, CircleShape)
                 .padding(16.dp),
-            tint = Color.White // 白色钩子
+            tint = Color.White
         )
         Spacer(Modifier.height(24.dp))
         Text(
@@ -396,7 +381,6 @@ private fun EmptyStateContent(onNavigateBack: () -> Unit) {
         )
         Spacer(Modifier.height(32.dp))
 
-        // 按钮风格完全复刻 EventDetailScreen (黑底白字)
         Button(
             onClick = onNavigateBack,
             modifier = Modifier
