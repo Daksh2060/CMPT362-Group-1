@@ -15,8 +15,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -28,7 +29,10 @@ fun DatePickerField(
     modifier: Modifier = Modifier,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
-    val dateFormatter = remember { SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()) }
+    val dateFormatter = remember {
+        DateTimeFormatter.ofPattern("MMM dd, yyyy", Locale.getDefault())
+            .withZone(ZoneId.systemDefault())
+    }
 
     OutlinedTextField(
         value = selectedDate,
@@ -48,7 +52,10 @@ fun DatePickerField(
 
     val onConfirm: () -> Unit = {
         datePickerState.selectedDateMillis?.let { selectedMillis ->
-            onDateSelected(dateFormatter.format(Date(selectedMillis)))
+            val localDate = Instant.ofEpochMilli(selectedMillis)
+                .atZone(ZoneId.of("UTC"))
+                .toLocalDate()
+            onDateSelected(dateFormatter.format(localDate))
         }
         showDatePicker = false
     }
