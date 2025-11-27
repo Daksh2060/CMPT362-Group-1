@@ -45,6 +45,13 @@ fun MapStateHolder(
         CampusLocation("Vancouver", LatLng(49.284572597611565, -123.11142976880664), zoom = 19f)
     )
 
+    DisposableEffect(Unit) {
+        Log.d("MapStateHolder2", "Created")
+        onDispose {
+            Log.d("MapStateHolder2", "Disposed")
+        }
+    }
+
     val context = LocalContext.current
 
     val cityNames = sfuLocations.map { it.name }

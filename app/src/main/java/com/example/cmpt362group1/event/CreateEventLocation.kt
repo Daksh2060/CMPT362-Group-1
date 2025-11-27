@@ -1,5 +1,9 @@
 package com.example.cmpt362group1.event
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +25,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.graphics.scale
+import com.example.cmpt362group1.R
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
@@ -98,6 +106,10 @@ fun LocationPicker(
     selectedLocation: LatLng,
     onLocationSelected: (LatLng) -> Unit
 ) {
+    val context: Context = LocalContext.current
+
+    var markerState by remember { mutableStateOf(MarkerState(position = selectedLocation)) }
+
     val restrictedBounds = LatLngBounds(
         LatLng(49.15, -123.2),
         LatLng(49.35, -122.8)
@@ -117,6 +129,18 @@ fun LocationPicker(
         )
     }
 
+    val markerIcon = remember {
+        try {
+            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.event_marker)
+            val scaledBitmap = bitmap.scale(120, 120)
+            bitmap.recycle() // Free memory
+            BitmapDescriptorFactory.fromBitmap(scaledBitmap)
+        } catch (e: Exception) {
+            Log.e("MapScreen", "Error loading marker icon", e)
+            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)
+        }
+    }
+
     GoogleMap(
         modifier = modifier,
         properties = mapProperties,
@@ -126,9 +150,11 @@ fun LocationPicker(
         }
     ) {
         Marker(
-            state = MarkerState(position = selectedLocation), // pin will change locations on click
+            state = markerState,
             title = "Event Location",
-            snippet = "Tap map to move pin"
+            icon = markerIcon,
+            snippet = "Drag pin or tap map to adjust location",
+            draggable = true
         )
     }
 }
