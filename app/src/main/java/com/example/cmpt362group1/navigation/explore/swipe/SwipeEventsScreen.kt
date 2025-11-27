@@ -20,7 +20,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -89,7 +88,7 @@ fun SwipeEventsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Discover",
+                        "Swipe to Decide",
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.Black
@@ -165,9 +164,16 @@ private fun DraggableEventCard(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val offsetX = remember { Animatable(0f) }
-    val swipeThreshold = 300f
 
-    val rotation by remember { derivedStateOf { offsetX.value / 25f } }
+    val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val density = androidx.compose.ui.platform.LocalDensity.current
+
+    val swipeThreshold = with(density) { (screenWidth * 0.15f).toPx() }
+    val maxExitDistance = with(density) { (screenWidth * 1.5f).toPx() }
+
+    val rotation by remember { derivedStateOf { offsetX.value / 20f } }
+
     val joinAlpha by remember { derivedStateOf { (offsetX.value / swipeThreshold).coerceIn(0f, 1f) } }
     val skipAlpha by remember { derivedStateOf { (-offsetX.value / swipeThreshold).coerceIn(0f, 1f) } }
 
@@ -187,17 +193,27 @@ private fun DraggableEventCard(
                     },
                     onDragEnd = {
                         coroutineScope.launch {
+                            val exitSpec = tween<Float>(
+                                durationMillis = 200,
+                                easing = androidx.compose.animation.core.FastOutLinearInEasing
+                            )
+
+                            val returnSpring = spring<Float>(
+                                dampingRatio = 0.45f,
+                                stiffness = 1200f
+                            )
+
                             when {
                                 offsetX.value > swipeThreshold -> {
-                                    offsetX.animateTo(1500f, tween(300))
+                                    offsetX.animateTo(maxExitDistance, exitSpec)
                                     onJoin()
                                 }
                                 offsetX.value < -swipeThreshold -> {
-                                    offsetX.animateTo(-1500f, tween(300))
+                                    offsetX.animateTo(-maxExitDistance, exitSpec)
                                     onSkip()
                                 }
                                 else -> {
-                                    offsetX.animateTo(0f, spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow))
+                                    offsetX.animateTo(0f, returnSpring)
                                 }
                             }
                         }
