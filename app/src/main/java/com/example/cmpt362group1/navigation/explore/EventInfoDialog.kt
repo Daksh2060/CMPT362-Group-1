@@ -72,7 +72,7 @@ fun EventInfoDialog(
                     .fillMaxWidth()
                     .padding(24.dp)
             ) {
-                // Title Section (Fixed at top)
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -91,7 +91,6 @@ fun EventInfoDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Scrollable Content Section
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -199,7 +198,6 @@ fun EventInfoDialog(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Buttons Section (Fixed at bottom)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
