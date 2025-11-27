@@ -30,6 +30,7 @@ import com.example.cmpt362group1.database.EventViewModel
 import com.example.cmpt362group1.database.UserViewModel
 import com.example.cmpt362group1.navigation.planner.PlannerHost
 import com.example.cmpt362group1.event.detail.EventDetailScreen
+import com.example.cmpt362group1.navigation.explore.swipe.SwipeEventsScreen
 
 @Composable
 fun NavigationBar(currentRoute: String, navController: NavHostController) {
@@ -39,7 +40,10 @@ fun NavigationBar(currentRoute: String, navController: NavHostController) {
         BottomNavigationBar(
             currentScreen = currentRoute,
             onTabSelected = { route ->
-                if (currentRoute.startsWith(Route.EventDetail.route)) {
+                if (
+                    currentRoute.startsWith(Route.EventDetail.route) ||
+                    currentRoute.startsWith(Route.SwipeDecider.route)
+                ) {
                     navController.popBackStack()
                 }
                 navController.navigate(route) {
@@ -99,6 +103,9 @@ fun MainScreen(
                         userViewModel = userViewModel,
                         onEventSelected = { id ->
                             navController.navigate("${Route.EventDetail.route}/$id")
+                        },
+                        onOpenSwipeDecider = {
+                            navController.navigate(Route.SwipeDecider.route)
                         }
                     )
                 }
@@ -167,6 +174,18 @@ fun MainScreen(
                             navController.navigate("${Route.EditEvent.route}/$id")
                         },
                         allowEditDelete = !readonly
+                    )
+                }
+
+                composable(Route.SwipeDecider.route) {
+                    SwipeEventsScreen(
+                        eventViewModel = eventViewModel,
+                        userViewModel = userViewModel,
+                        authViewModel = authViewModel,
+                        onNavigateBack = { navController.popBackStack() },
+                        onEventClick = { eventId ->
+                            navController.navigate("${Route.EventDetail.route}/$eventId")
+                        }
                     )
                 }
             }

@@ -442,17 +442,21 @@ private fun EventDetailScrollableContent(
                 }
             }
             Spacer(Modifier.height(16.dp))
-            Button(
-                onClick = onToggleJoin,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.onSurface,
-                    contentColor = MaterialTheme.colorScheme.surface
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Text(if (isJoined) "Remove from Planner" else "Add to Planner")
+
+            if (!isHost) {
+                Button(
+                    onClick = onToggleJoin,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.onSurface,
+                        contentColor = MaterialTheme.colorScheme.surface
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(if (isJoined) "Remove from Planner" else "Add to Planner")
+                }
             }
+
             if (isJoined) {
                 Spacer(Modifier.height(8.dp))
                 OutlinedButton(
