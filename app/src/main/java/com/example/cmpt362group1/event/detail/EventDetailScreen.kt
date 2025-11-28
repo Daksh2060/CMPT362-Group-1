@@ -318,6 +318,8 @@ fun EventDetailScreen(
                             showDeleteConfirm = false
                             eventViewModel.deleteEvent(id) { success ->
                                 if (success) {
+                                    userViewModel.removeCreatedEvent(currentUserId!!, id)
+                                    userViewModel.removeJoinedEvent(currentUserId!!, id)
                                     onNavigateBack()
                                 }
                             }
