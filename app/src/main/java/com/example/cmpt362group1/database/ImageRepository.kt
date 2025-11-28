@@ -2,6 +2,7 @@ package com.example.cmpt362group1.database
 
 import android.content.Context
 import android.net.Uri
+import kotlinx.coroutines.coroutineScope
 import java.util.UUID
 
 interface ImageRepository {
@@ -11,15 +12,14 @@ interface ImageRepository {
         path: ImageStoragePath
     ) : ImageUploadResult
 
-    suspend fun deleteImage(imageUrl: String) : Boolean
-}
+    suspend fun uploadImages(
+        uris: List<Uri>,
+        context: Context,
+        path: ImageStoragePath
+    ): BatchImageUploadResult
 
-//sealed class ImageStoragePath(val path: String) {
-//    data class EventImage(val eventId: String) : ImageStoragePath("events/$eventId")
-//    data class UserProfile(val userId: String) : ImageStoragePath("users/$userId/profile")
-//    data class UserGallery(val userId: String, val imageId: String = UUID.randomUUID().toString()) :
-//        ImageStoragePath("users/$userId/gallery/$imageId")
-//}
+    suspend fun deleteImages(imageUrls: List<String>) : Boolean
+}
 
 sealed class ImageStoragePath(val path: String) {
     object EventImage : ImageStoragePath("events/")
@@ -30,4 +30,15 @@ sealed class ImageUploadResult {
     data class Success(val url: String) : ImageUploadResult()
     data class Error(val message: String) : ImageUploadResult()
     object Loading : ImageUploadResult()
+}
+
+data class BatchImageUploadResult(
+    val successUrls: List<String>,
+    val errors: List<String>,
+    val totalUploaded: Int,
+    val totalFailed: Int
+) {
+    val isCompleteSuccess: Boolean get() = totalFailed == 0
+    val isPartialSuccess: Boolean get() = totalUploaded > 0 && totalFailed > 0
+    val isCompleteFailure: Boolean get() = totalUploaded == 0
 }

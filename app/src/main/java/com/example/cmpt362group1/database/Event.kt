@@ -23,5 +23,7 @@ data class Event(
     val dressCode: String = "",
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val imageUrl: String = "",
+
+    val imageUrl: String = "", // legacy
+    val imageUrls: ArrayList<String> = arrayListOf(),
 )
