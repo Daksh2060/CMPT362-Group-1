@@ -38,6 +38,7 @@ import java.time.format.DateTimeFormatter
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.cmpt362group1.database.ImageViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +50,7 @@ fun EventDetailScreen(
     eventViewModel: EventViewModel = viewModel(),
     userViewModel: UserViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel(),
+    imageViewModel: ImageViewModel = viewModel(), // delete event
 ) {
     val eventState by eventViewModel.eventState.collectAsState()
     val userState by userViewModel.userState.collectAsState()
@@ -64,6 +66,7 @@ fun EventDetailScreen(
     }
 
     var currentUserId by remember { mutableStateOf<String?>(null) }
+    var eventImages by remember { mutableStateOf<ArrayList<String>>(ArrayList()) } // for deletion
 
     LaunchedEffect(Unit) {
         val uid = authViewModel.getUserId()
@@ -165,6 +168,8 @@ fun EventDetailScreen(
                 val event = (eventState as EventViewModel.EventUiState.Success).event
                 val isHost = currentUserId != null && event.createdBy == currentUserId
                 val listState = rememberLazyListState()
+
+                eventImages = event.imageUrls
 
                 Column(
                     modifier = Modifier
@@ -318,6 +323,9 @@ fun EventDetailScreen(
                             showDeleteConfirm = false
                             eventViewModel.deleteEvent(id) { success ->
                                 if (success) {
+                                    userViewModel.removeCreatedEvent(currentUserId!!, id)
+                                    userViewModel.removeJoinedEvent(currentUserId!!, id)
+                                    imageViewModel.deleteImages(eventImages)
                                     onNavigateBack()
                                 }
                             }

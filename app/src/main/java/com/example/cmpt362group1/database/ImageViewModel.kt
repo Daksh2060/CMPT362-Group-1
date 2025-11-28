@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,7 +21,7 @@ class ImageViewModel (
         context: Context,
         path: ImageStoragePath,
         onSuccess: (String) -> Unit = {}
-    ) {
+    ) { // legacy
         viewModelScope.launch {
             _uploadState.value = ImageUploadState(isLoading = true)
 
@@ -37,6 +38,44 @@ class ImageViewModel (
         }
     }
 
+    fun uploadImages(
+        uris: List<Uri>,
+        context: Context,
+        path: ImageStoragePath,
+        onSuccess: (ImageUploadState) -> Unit = {},
+        onError: (String) -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            _uploadState.value = ImageUploadState(isLoading = true)
+            val batchUploadResult = repository.uploadImages(uris, context, path)
+
+            when {
+                batchUploadResult.isCompleteFailure -> {
+                    val error = batchUploadResult.errors.first()
+                    _uploadState.value = ImageUploadState(error = error)
+
+                    onError(error)
+                }
+                else -> {
+                    _uploadState.value = ImageUploadState(
+                        uploadedUrl = batchUploadResult.successUrls.first(), // legacy
+                        uploadedUrls = batchUploadResult.successUrls
+                    )
+
+                    onSuccess(_uploadState.value)
+                }
+            }
+        }
+    }
+
+    fun deleteImages(urls: List<String>) {
+        if (urls.isEmpty())  return
+
+        viewModelScope.launch {
+            repository.deleteImages(urls)
+        }
+    }
+
     fun resetState() {
         _uploadState.value = ImageUploadState()
     }
@@ -44,6 +83,7 @@ class ImageViewModel (
 
 data class ImageUploadState(
     val isLoading: Boolean = false,
-    val uploadedUrl: String? = null,
+    val uploadedUrl: String? = null, // legacy
+    val uploadedUrls: List<String> = emptyList(),
     val error: String? = null
 )

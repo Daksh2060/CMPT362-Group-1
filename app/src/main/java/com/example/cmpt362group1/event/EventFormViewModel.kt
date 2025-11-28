@@ -8,11 +8,19 @@ import androidx.lifecycle.ViewModel
 import com.example.cmpt362group1.database.Event
 
 class EventFormViewModel() : ViewModel() {
+    companion object {
+        const val MAX_IMAGE_UPLOAD = 3
+    }
+
     var formInput by mutableStateOf(Event())
         private set
 
-    var imageUri: Uri? by mutableStateOf(null)
+    var imageUri: Uri? by mutableStateOf(null) // legacy
         private set
+
+    private val _imageUris = mutableStateOf<List<Uri>>(emptyList())
+
+    val imageUris: List<Uri> by _imageUris
 
     fun setUserID(value: String) {
         formInput = formInput.copy(createdBy = value)
@@ -58,8 +66,26 @@ class EventFormViewModel() : ViewModel() {
         formInput = formInput.copy(imageUrl = url)
     }
 
-    fun updateImageUri(uri: Uri?) {
+    fun updateImageUrls(urls: List<String>) {
+        formInput = formInput.copy(imageUrls = ArrayList(urls))
+    }
+
+    fun updateImageUri(uri: Uri?) { // legacy function
         imageUri = uri
+    }
+
+    fun updateImageUris(uris: List<Uri>) {
+        val updatedUris = (_imageUris.value + uris).take(MAX_IMAGE_UPLOAD)
+        _imageUris.value = updatedUris
+
+        // legacy: for backwards compatibility
+        updateImageUri(uris.first())
+    }
+
+    fun removeImageUri(index: Int) {
+        _imageUris.value = _imageUris.value.toMutableList().apply {
+            removeAt(index)
+        }
     }
 
     fun resetForm() {
