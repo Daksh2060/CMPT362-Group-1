@@ -35,6 +35,9 @@ class EventViewModel(
     private val _isCurrentUserCheckedIn = MutableStateFlow(false)
     val isCurrentUserCheckedIn: StateFlow<Boolean> = _isCurrentUserCheckedIn.asStateFlow()
 
+    private val _bannedUsersList = MutableStateFlow<List<User>>(emptyList())
+    val bannedUsersList: StateFlow<List<User>> = _bannedUsersList.asStateFlow()
+
     init {
         loadAllEvents()
     }
@@ -318,5 +321,54 @@ class EventViewModel(
         data object Loading : CommentsUiState()
         data class Success(val comments: List<Comment>) : CommentsUiState()
         data class Error(val message: String) : CommentsUiState()
+    }
+
+    fun deleteComment(eventId: String, commentId: String) {
+        viewModelScope.launch {
+            val result = repository.deleteComment(eventId, commentId)
+
+            if (result.isSuccess) {
+                Log.d("EventViewModel", "Comment deleted successfully")
+            } else {
+                Log.e("EventViewModel", "Failed to delete comment", result.exceptionOrNull())
+            }
+        }
+    }
+
+    fun banUser(eventId: String, userIdToBan: String) {
+        viewModelScope.launch {
+            val result = repository.banUser(eventId, userIdToBan)
+
+            if (result.isSuccess) {
+                Log.d("EventViewModel", "User $userIdToBan banned from event $eventId")
+                loadEvent(eventId)
+            } else {
+                Log.e("EventViewModel", "Failed to ban user", result.exceptionOrNull())
+            }
+        }
+    }
+
+    fun unbanUser(eventId: String, userIdToUnban: String) {
+        viewModelScope.launch {
+            val result = repository.unbanUser(eventId, userIdToUnban)
+            if (result.isSuccess) {
+                Log.d("EventViewModel", "User unbanned")
+                loadEvent(eventId)
+            }
+        }
+    }
+
+    fun loadBannedUsersDetails(userIds: List<String>) {
+        viewModelScope.launch {
+            if (userIds.isEmpty()) {
+                _bannedUsersList.value = emptyList()
+            } else {
+                val userRepo = UserRepositoryImpl()
+                val result = userRepo.getUsersByIds(userIds)
+                if (result.isSuccess) {
+                    _bannedUsersList.value = result.getOrNull() ?: emptyList()
+                }
+            }
+        }
     }
 }

@@ -28,6 +28,11 @@ interface EventRepository {
     suspend fun checkIn(eventId: String, userId: String): Result<Unit>
 
     suspend fun cancelCheckIn(eventId: String, userId: String): Result<Unit>
+
+    suspend fun deleteComment(eventId: String, commentId: String): Result<Unit>
+
+    suspend fun banUser(eventId: String, userId: String): Result<Unit>
+    suspend fun unbanUser(eventId: String, userId: String): Result<Unit>
 }
 
 data class CheckInData(

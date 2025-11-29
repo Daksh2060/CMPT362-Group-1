@@ -1,5 +1,6 @@
 package com.example.cmpt362group1.database
 
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.toObject
@@ -191,6 +192,40 @@ class EventRepositoryImpl(
                 .collection("checkins")
                 .document(userId)
                 .delete()
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun deleteComment(eventId: String, commentId: String): Result<Unit> {
+        return try {
+            firestore.collection("events").document(eventId)
+                .collection("comments").document(commentId)
+                .delete()
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun banUser(eventId: String, userId: String): Result<Unit> {
+        return try {
+            firestore.collection("events").document(eventId)
+                .update("bannedUserIds", FieldValue.arrayUnion(userId))
+                .await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun unbanUser(eventId: String, userId: String): Result<Unit> {
+        return try {
+            firestore.collection("events").document(eventId)
+                .update("bannedUserIds", FieldValue.arrayRemove(userId)) // 使用 arrayRemove
                 .await()
             Result.success(Unit)
         } catch (e: Exception) {
