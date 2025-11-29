@@ -74,7 +74,7 @@ fun EventDetailScreen(
     eventViewModel: EventViewModel = viewModel(),
     userViewModel: UserViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel(),
-    imageViewModel: ImageViewModel = viewModel(),
+    imageViewModel: ImageViewModel = viewModel(),  // delete event
 ) {
     val eventState by eventViewModel.eventState.collectAsState()
     val userState by userViewModel.userState.collectAsState()
@@ -91,7 +91,7 @@ fun EventDetailScreen(
     }
 
     var currentUserId by remember { mutableStateOf<String?>(null) }
-    var eventImages by remember { mutableStateOf<ArrayList<String>>(ArrayList()) }
+    var eventImages by remember { mutableStateOf<ArrayList<String>>(ArrayList()) }  // for deletion
 
     LaunchedEffect(Unit) {
         val uid = authViewModel.getUserId()
