@@ -115,4 +115,23 @@ class UserRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun getUsersByIds(userIds: List<String>): Result<List<User>> {
+        if (userIds.isEmpty()) return Result.success(emptyList())
+        return try {
+            val chunks = userIds.chunked(10)
+            val allUsers = mutableListOf<User>()
+
+            for (chunk in chunks) {
+                val snapshot = firestore.collection(USERS_COLLECTION)
+                    .whereIn(com.google.firebase.firestore.FieldPath.documentId(), chunk)
+                    .get()
+                    .await()
+                allUsers.addAll(snapshot.toObjects(User::class.java))
+            }
+            Result.success(allUsers)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

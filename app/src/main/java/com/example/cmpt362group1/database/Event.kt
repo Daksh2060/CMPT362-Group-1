@@ -26,4 +26,6 @@ data class Event(
 
     val imageUrl: String = "", // legacy
     val imageUrls: ArrayList<String> = arrayListOf(),
+
+    val bannedUserIds: List<String> = emptyList()
 )
