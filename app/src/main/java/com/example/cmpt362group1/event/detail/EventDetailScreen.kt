@@ -876,25 +876,88 @@ private fun CommentInputBar(commentText: String,
 @Composable
 fun WeatherInfoPanel(lat: Double, lon: Double, date: String, time: String) {
     var weatherData by remember { mutableStateOf<WeatherResult?>(null) }
+    var weatherError by remember { mutableStateOf<String?>(null) }
     val repository = remember { WeatherRepository() }
+
     LaunchedEffect(Unit) {
         try {
             val inputFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy hh:mm a")
             val eventDateTime = LocalDateTime.parse("$date $time", inputFormatter)
-            repository.getWeatherForDateTime(lat, lon,
-                eventDateTime.format(DateTimeFormatter.ofPattern(
-                    "yyyy-MM-dd'T'HH:00")),
-                { weatherData = it }, {})
-        } catch (e: Exception) {}
+
+            repository.getWeatherForDateTime(
+                lat,
+                lon,
+                eventDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:00")),
+                onSuccess = { weatherData = it },
+                onError = { weatherError = it }
+            )
+        } catch (e: Exception) {
+            weatherError = "Check back closer to date."
+        }
     }
-    Column {
-        Text("Expected Weather", style = MaterialTheme.typography.titleMedium,
-            color = MonoBlack, fontWeight = FontWeight.Bold)
-        if (weatherData != null) {
-            Text("${weatherData!!.temperature.toInt()}°C - ${weatherData!!.condition}",
-                style = MaterialTheme.typography.bodyLarge, color = MonoBlack)
-        } else {
-            Text("Loading weather...", color = MonoDarkGray)
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Expected Weather",
+            style = MaterialTheme.typography.titleMedium,
+            color = MonoBlack,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(8.dp))
+
+        when {
+            weatherData != null -> {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "${weatherData!!.temperature.toInt()}°C",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MonoBlack,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    val symbol = com.example.cmpt362group1.navigation.explore.weather.WeatherHelper
+                        .getWeatherSymbol(weatherData!!.condition.lowercase())
+                    Text(text = symbol, fontSize = 28.sp)
+
+                    Text(
+                        text = weatherData!!.condition,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MonoDarkGray
+                    )
+                }
+            }
+            weatherError != null -> {
+                Text(
+                    text = "Weather info unavailable.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MonoDarkGray
+                )
+                Text(
+                    text = weatherError ?: "",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray
+                )
+            }
+            else -> {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = MonoBlack
+                    )
+                    Text(
+                        text = "Loading forecast...",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MonoDarkGray
+                    )
+                }
+            }
         }
     }
 }
