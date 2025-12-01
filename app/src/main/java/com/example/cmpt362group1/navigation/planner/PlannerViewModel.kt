@@ -3,6 +3,8 @@ package com.example.cmpt362group1.navigation.planner
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.*
 import java.time.LocalDate
 
@@ -12,6 +14,7 @@ class PlannerViewModel(
 
     private val query = MutableStateFlow("")
 
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val uiState: StateFlow<PlannerUiState> =
         query
             .debounce(150)
@@ -25,7 +28,7 @@ class PlannerViewModel(
                 grouped.forEach { section ->
                     Log.d(
                         "PlannerDebug",
-                        "PlannerViewModel: section date = ${section.date}, size=${section.items.size}"
+                        "PlannerViewModel: date = ${section.date}, size=${section.items.size}"
                     )
                 }
 

@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -21,7 +20,7 @@ class ImageViewModel (
         context: Context,
         path: ImageStoragePath,
         onSuccess: (String) -> Unit = {}
-    ) { // legacy
+    ) {
         viewModelScope.launch {
             _uploadState.value = ImageUploadState(isLoading = true)
 

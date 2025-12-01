@@ -1,5 +1,6 @@
 package com.example.cmpt362group1.navigation.explore.swipe
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.BorderStroke
@@ -214,6 +215,7 @@ fun SwipeEventsScreen(
     }
 }
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @Composable
 private fun DraggableEventCard(
     event: Event,
@@ -248,9 +250,15 @@ private fun DraggableEventCard(
     val haptic = LocalHapticFeedback.current
     var hasVibrated by remember { mutableStateOf(false) }
 
-    val rotation by remember { derivedStateOf { offsetX.value / 20f } }
-    val joinAlpha by remember { derivedStateOf { (offsetX.value / swipeThreshold).coerceIn(0f, 1f) } }
-    val skipAlpha by remember { derivedStateOf { (-offsetX.value / swipeThreshold).coerceIn(0f, 1f) } }
+    val rotation by remember {
+        derivedStateOf { offsetX.value / 20f }
+    }
+    val joinAlpha by remember {
+        derivedStateOf { (offsetX.value / swipeThreshold).coerceIn(0f, 1f) }
+    }
+    val skipAlpha by remember {
+        derivedStateOf { (-offsetX.value / swipeThreshold).coerceIn(0f, 1f) }
+    }
 
     Box(
         modifier = Modifier
@@ -363,7 +371,11 @@ private fun StaticEventCard(
 ) {
     Card(
         modifier = modifier
-            .shadow(elevation = 8.dp, shape = RoundedCornerShape(24.dp), spotColor = Color.Gray.copy(alpha = 0.5f)),
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(24.dp),
+                spotColor = Color.Gray.copy(alpha = 0.5f)
+            ),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)

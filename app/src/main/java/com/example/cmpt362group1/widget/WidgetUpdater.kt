@@ -1,5 +1,6 @@
 package com.example.cmpt362group1.widget
 
+import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
@@ -19,7 +20,7 @@ object WidgetUpdater {
         val weatherRepository = WeatherRepository()
 
         val prefs = context.getSharedPreferences("widget_data", Context.MODE_PRIVATE)
-        prefs.edit { clear() } // delete old data
+        prefs.edit { clear() }
 
         events
             .filter { it ->
@@ -42,12 +43,12 @@ object WidgetUpdater {
                     event.longitude!!,
                     dateTime!!,
                     onSuccess = { weather ->
-                        Log.d("INFO WIDGET", "Saving event with weather ${weather}")
+                        Log.d("INFO WIDGET", "Saving event with weather $weather")
                         saveEventWithWeather(context, event, weather)
                         refreshWidget(context)
                     },
                     onError = { error ->
-                        Log.d("INFO WIDGET", "Saving event with no weather: ${error}")
+                        Log.d("INFO WIDGET", "Saving event with no weather: $error")
                         saveEventWithWeather(context, event, null)
                         refreshWidget(context)
                     }
@@ -55,13 +56,14 @@ object WidgetUpdater {
             }
     }
 
+    @SuppressLint("MutatingSharedPrefs")
     private fun saveEventWithWeather(
         context: Context,
         event: Event,
         weather: WeatherResult?
     ) {
         val prefs = context.getSharedPreferences("widget_data", Context.MODE_PRIVATE)
-        val existingData = prefs.getStringSet("events", mutableSetOf()) ?: mutableSetOf() //NEW - changed key to "events"
+        val existingData = prefs.getStringSet("events", mutableSetOf()) ?: mutableSetOf()
 
         val eventData = buildString {
             append(event.title).append("|")
@@ -72,13 +74,13 @@ object WidgetUpdater {
             append(weather?.temperature ?: "")
         }
 
-        Log.d("INFO WIDGET", "Saving event to prefs: ${eventData}")
+        Log.d("INFO WIDGET", "Saving event to prefs: $eventData")
 
         existingData.add(eventData)
-        prefs.edit()
-            .putStringSet("events", existingData)
-            .putLong("last_updated", System.currentTimeMillis())
-            .apply()
+        prefs.edit {
+            putStringSet("events", existingData)
+                .putLong("last_updated", System.currentTimeMillis())
+        }
     }
 
     private fun refreshWidget(context: Context) {

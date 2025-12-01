@@ -1,6 +1,5 @@
 package com.example.cmpt362group1
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,16 +18,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cmpt362group1.event.CreateEvent
 import com.example.cmpt362group1.event.Fab
-import com.example.cmpt362group1.event.CreateEvent
 import com.example.cmpt362group1.event.EditEvent
 import com.example.cmpt362group1.navigation.BottomNavigationBar
 import com.example.cmpt362group1.navigation.explore.MapStateHolder
 import com.example.cmpt362group1.navigation.profile.ProfileScreen
 import com.example.cmpt362group1.navigation.profile.ViewUserProfileScreen
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.cmpt362group1.auth.AuthViewModel
-import com.example.cmpt362group1.database.EventViewModel
-import com.example.cmpt362group1.database.UserViewModel
 import com.example.cmpt362group1.navigation.planner.PlannerHost
 import com.example.cmpt362group1.event.detail.EventDetailScreen
 import com.example.cmpt362group1.navigation.explore.swipe.SwipeEventsScreen
@@ -159,7 +153,9 @@ fun MainScreen(
                 ) { backStackEntry ->
                     val eventId = backStackEntry.arguments?.getString("eventId")
                         ?: return@composable
-                    val readonly = backStackEntry.arguments?.getString("readonly")?.toBoolean() ?: false
+                    val readonly = backStackEntry.arguments?.getString(
+                        "readonly"
+                    )?.toBoolean() ?: false
 
                     EventDetailScreen(
                         eventId = eventId,

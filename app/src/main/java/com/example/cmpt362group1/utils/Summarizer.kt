@@ -1,6 +1,5 @@
 package com.example.cmpt362group1.utils
 
-import android.content.Context
 import android.util.Log
 
 sealed class SummaryResult {

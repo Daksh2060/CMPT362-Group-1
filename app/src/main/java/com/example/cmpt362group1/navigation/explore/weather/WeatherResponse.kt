@@ -13,6 +13,6 @@ data class CurrentWeather(
 
 data class HourlyWeather(
     val time: List<String>,
-    val temperature_2m: List<Double>,
+    val temperature2m: List<Double>,
     val weathercode: List<Int>
 )

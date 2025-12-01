@@ -15,7 +15,7 @@ class EventFormViewModel() : ViewModel() {
     var formInput by mutableStateOf(Event())
         private set
 
-    var imageUri: Uri? by mutableStateOf(null) // legacy
+    var imageUri: Uri? by mutableStateOf(null)
         private set
 
     private val _imageUris = mutableStateOf<List<Uri>>(emptyList())
@@ -70,7 +70,7 @@ class EventFormViewModel() : ViewModel() {
         formInput = formInput.copy(imageUrls = ArrayList(urls))
     }
 
-    fun updateImageUri(uri: Uri?) { // legacy function
+    fun updateImageUri(uri: Uri?) {
         imageUri = uri
     }
 

@@ -61,7 +61,8 @@ fun LoginScreen(
 
     val gso = remember {
         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("657057707753-8k8h7mt0muj5a6b5kj4hsjsslef83djr.apps.googleusercontent.com")
+            .requestIdToken(
+                "657057707753-8k8h7mt0muj5a6b5kj4hsjsslef83djr.apps.googleusercontent.com")
             .requestEmail()
             .build()
     }
@@ -172,7 +173,6 @@ fun LoginScreen(
                         }
                     }
                 }
-
             }
         }
     }

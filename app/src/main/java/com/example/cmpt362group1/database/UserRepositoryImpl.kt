@@ -163,7 +163,8 @@ class UserRepositoryImpl(
         }
     }
 
-    override suspend fun unfollowUser(currentUserId: String, userToUnfollowId: String): Result<Unit> {
+    override suspend fun unfollowUser(
+        currentUserId: String, userToUnfollowId: String): Result<Unit> {
         return try {
             firestore.collection(USERS_COLLECTION)
                 .document(currentUserId)

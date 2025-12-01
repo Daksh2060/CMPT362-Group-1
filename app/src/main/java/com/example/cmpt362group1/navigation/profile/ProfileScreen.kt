@@ -78,7 +78,7 @@ fun ProfileScreen(
     }
 
     val userState by userViewModel.userState.collectAsState()
-    when (val state = userState) {
+    when (userState) {
         is UserUiState.Loading -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
@@ -201,7 +201,9 @@ fun ProfileView(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.clickable {
                                 scope.launch {
-                                    followersList = userViewModel.getUsersByIds(userProfile.followersList)
+                                    followersList = userViewModel.getUsersByIds(
+                                        userProfile.followersList
+                                    )
                                     showFollowersDialog = true
                                 }
                             }
@@ -221,7 +223,9 @@ fun ProfileView(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.clickable {
                                 scope.launch {
-                                    followingList = userViewModel.getUsersByIds(userProfile.followingList)
+                                    followingList = userViewModel.getUsersByIds(
+                                        userProfile.followingList
+                                    )
                                     showFollowingDialog = true
                                 }
                             }
@@ -253,7 +257,10 @@ fun ProfileView(
                     ) {
                         Text(
                             text = userProfile.displayName.ifEmpty {
-                                if (userProfile.firstName.isNotEmpty() || userProfile.lastName.isNotEmpty()) {
+                                if (userProfile.firstName.isNotEmpty()
+                                    || userProfile.lastName.isNotEmpty()
+                                    )
+                                {
                                     "${userProfile.firstName} ${userProfile.lastName}".trim()
                                 } else {
                                     "Name"
@@ -374,7 +381,9 @@ fun ProfileView(
                             ProfileEventGridItem(
                                 event = event,
                                 onClick = {
-                                    mainNavController.navigate("${Route.EventDetail.route}/${event.id}?readonly=true")
+                                    mainNavController.navigate(
+                                        "${Route.EventDetail.route}/${event.id}?readonly=true"
+                                    )
                                 }
                             )
                         }
@@ -384,7 +393,6 @@ fun ProfileView(
 
             item {
                 Spacer(modifier = Modifier.height(16.dp))
-
                 OutlinedButton(
                     onClick = { authViewModel.signOut() },
                     modifier = Modifier.fillMaxWidth(),

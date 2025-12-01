@@ -133,7 +133,7 @@ class UserViewModel(
             val result = repository.removeCreatedEvent(uid, eventId)
 
             if (result.isFailure) {
-                Log.e("INFO UserViewModel", "Failed to remove created event", result.exceptionOrNull())
+                Log.e("INFO UserViewModel", "Failed to remove made event", result.exceptionOrNull())
             } else {
                 Log.d("INFO UserViewModel", "Removed created event: $eventId from user: $uid")
             }
@@ -145,7 +145,7 @@ class UserViewModel(
             val result = repository.removeJoinedEvent(uid, eventId)
 
             if (result.isFailure) {
-                Log.e("INFO UserViewModel", "Failed to remove joined event", result.exceptionOrNull())
+                Log.e("INFO UserViewModel", "Failed to remove event", result.exceptionOrNull())
             } else {
                 Log.d("INFO UserViewModel", "Removed joined event: $eventId from user: $uid")
             }
@@ -171,7 +171,7 @@ class UserViewModel(
             if (result.isFailure) {
                 Log.e("INFO UserViewModel", "Failed to unfollow user", result.exceptionOrNull())
             } else {
-                Log.d("INFO UserViewModel", "User $currentUserId unfollowed user $userToUnfollowId")
+                Log.d("INFO UserViewModel", "User $currentUserId unfollowed $userToUnfollowId")
             }
         }
     }

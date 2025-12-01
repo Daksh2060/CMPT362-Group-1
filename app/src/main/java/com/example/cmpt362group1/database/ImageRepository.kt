@@ -2,8 +2,6 @@ package com.example.cmpt362group1.database
 
 import android.content.Context
 import android.net.Uri
-import kotlinx.coroutines.coroutineScope
-import java.util.UUID
 
 interface ImageRepository {
     suspend fun uploadImage(
@@ -38,7 +36,5 @@ data class BatchImageUploadResult(
     val totalUploaded: Int,
     val totalFailed: Int
 ) {
-    val isCompleteSuccess: Boolean get() = totalFailed == 0
-    val isPartialSuccess: Boolean get() = totalUploaded > 0 && totalFailed > 0
     val isCompleteFailure: Boolean get() = totalUploaded == 0
 }

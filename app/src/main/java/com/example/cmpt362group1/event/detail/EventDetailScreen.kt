@@ -1,5 +1,6 @@
 package com.example.cmpt362group1.event.detail
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -20,11 +21,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -67,6 +67,7 @@ private val MonoLightGray = Color(0xFFE0E0E0)
 private val MonoCardGray = Color(0xFFF0F0F0)
 private val LightRed = Color(0xFFE57373)
 
+@SuppressLint("MutableCollectionMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventDetailScreen(
@@ -95,7 +96,7 @@ fun EventDetailScreen(
     }
 
     var currentUserId by remember { mutableStateOf<String?>(null) }
-    var eventImages by remember { mutableStateOf<ArrayList<String>>(ArrayList()) }  // for deletion
+    var eventImages by remember { mutableStateOf<ArrayList<String>>(ArrayList()) }
 
     LaunchedEffect(Unit) {
         val uid = authViewModel.getUserId()
@@ -287,7 +288,10 @@ fun EventDetailScreen(
                                     .height(60.dp)
                                     .background(
                                         Brush.verticalGradient(
-                                            colors = listOf(Color.Transparent, Color.White.copy(alpha = 0.95f))
+                                            colors = listOf(
+                                                Color.Transparent,
+                                                Color.White.copy(alpha = 0.95f)
+                                            )
                                         )
                                     ),
                                 contentAlignment = Alignment.BottomCenter
@@ -327,7 +331,13 @@ fun EventDetailScreen(
                                 val uid = authViewModel.getUserId()
                                 if (uid != null) {
                                     val name = currentUserName ?: "Anonymous"
-                                    eventViewModel.postComment(event.id, uid, name, text, replyTo?.id)
+                                    eventViewModel.postComment(
+                                        event.id,
+                                        uid,
+                                        name,
+                                        text,
+                                        replyTo?.id
+                                    )
                                 }
                                 commentText = ""
                                 replyTo = null
@@ -337,7 +347,11 @@ fun EventDetailScreen(
                 }
 
                 if (showBannedListDialog) {
-                    BlockedUsersDialog(bannedUsersList, { showBannedListDialog = false }, { eventViewModel.unbanUser(event.id, it) })
+                    BlockedUsersDialog(
+                        bannedUsersList,
+                        { showBannedListDialog = false },
+                        { eventViewModel.unbanUser(event.id, it) }
+                    )
                 }
 
                 if (showParticipantsDialog && navController != null) {
@@ -350,7 +364,9 @@ fun EventDetailScreen(
                             onUserClick = { clickedUserId ->
                                 showParticipantsDialog = false
                                 if (clickedUserId != currentUid) {
-                                    navController.navigate("${Route.ViewUserProfile.route}/$clickedUserId")
+                                    navController.navigate(
+                                        "${Route.ViewUserProfile.route}/$clickedUserId"
+                                    )
                                 }
                             },
                             onFollowClick = { userToFollowId ->
@@ -393,7 +409,8 @@ fun EventDetailScreen(
                     ) { Text("Delete") }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDeleteConfirm = false }) { Text("Cancel", color = MonoBlack) }
+                    TextButton(onClick = { showDeleteConfirm = false })
+                    { Text("Cancel", color = MonoBlack) }
                 }
             )
         }
@@ -418,8 +435,10 @@ private fun EventImageCarousel(
 
         val initialPage = if (infiniteLoop) (Int.MAX_VALUE / 2) - ((Int.MAX_VALUE / 2) % pageCount)
         else 0
-        val pagerState = rememberPagerState(initialPage = initialPage, pageCount = { if (infiniteLoop)
-            Int.MAX_VALUE else pageCount })
+        val pagerState = rememberPagerState(
+            initialPage = initialPage, pageCount = { if (infiniteLoop)
+            Int.MAX_VALUE else pageCount }
+        )
 
         val coroutineScope = rememberCoroutineScope()
         val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
@@ -465,7 +484,8 @@ private fun EventImageCarousel(
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
                             .size(36.dp)
                     ) {
-                        Icon(Icons.Filled.KeyboardArrowLeft, "Prev",
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowLeft, "Prev",
                             tint = Color.White)
                     }
 
@@ -481,7 +501,8 @@ private fun EventImageCarousel(
                             .background(Color.Black.copy(alpha = 0.5f), CircleShape)
                             .size(36.dp)
                     ) {
-                        Icon(Icons.Filled.KeyboardArrowRight, "Next",
+                        Icon(
+                            Icons.AutoMirrored.Filled.KeyboardArrowRight, "Next",
                             tint = Color.White)
                     }
                 }
@@ -544,7 +565,7 @@ private fun EventDetailScrollableContent(
     onEditEvent: () -> Unit,
     onDeleteEvent: () -> Unit,
     onParticipantsClick: () -> Unit = {},
-    modifier: Modifier = Modifier
+    @SuppressLint("ModifierParameter") modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -764,7 +785,11 @@ private fun CommentRow(
 }
 
 @Composable
-fun BlockedUsersDialog(blockedUsers: List<User>, onDismiss: () -> Unit, onUnblock: (String) -> Unit) {
+fun BlockedUsersDialog(
+    blockedUsers: List<User>,
+    onDismiss: () -> Unit,
+    onUnblock: (String) -> Unit)
+{
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = RoundedCornerShape(12.dp),
             color = Color.White,
@@ -938,7 +963,7 @@ fun WeatherInfoPanel(lat: Double, lon: Double, date: String, time: String) {
                 onSuccess = { weatherData = it },
                 onError = { weatherError = it }
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             weatherError = "Check back closer to date."
         }
     }

@@ -15,26 +15,19 @@ class EventViewModel(
 
     private val _eventsState = MutableStateFlow<EventsUiState>(EventsUiState.Loading)
     val eventsState: StateFlow<EventsUiState> = _eventsState.asStateFlow()
-
     private val _eventState = MutableStateFlow<EventUiState>(EventUiState.Idle)
     val eventState: StateFlow<EventUiState> = _eventState.asStateFlow()
-
     private val _operationState = MutableStateFlow<OperationUiState>(OperationUiState.Idle)
     val operationState: StateFlow<OperationUiState> = _operationState.asStateFlow()
-
     private val _commentsState =
         MutableStateFlow<CommentsUiState>(CommentsUiState.Loading)
     val commentsState: StateFlow<CommentsUiState> = _commentsState.asStateFlow()
-
     private val _participantsCount = MutableStateFlow(0)
     val participantsCount: StateFlow<Int> = _participantsCount.asStateFlow()
-
     private val _arrivedCount = MutableStateFlow(0)
     val arrivedCount: StateFlow<Int> = _arrivedCount.asStateFlow()
-
     private val _isCurrentUserCheckedIn = MutableStateFlow(false)
     val isCurrentUserCheckedIn: StateFlow<Boolean> = _isCurrentUserCheckedIn.asStateFlow()
-
     private val _bannedUsersList = MutableStateFlow<List<User>>(emptyList())
     val bannedUsersList: StateFlow<List<User>> = _bannedUsersList.asStateFlow()
 
@@ -134,7 +127,6 @@ class EventViewModel(
             }
         }
     }
-
 
     fun addEvent(event: Event) {
         viewModelScope.launch {

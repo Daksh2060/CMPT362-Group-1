@@ -1,7 +1,6 @@
 package com.example.cmpt362group1.navigation.profile
 
 import android.content.Intent
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -13,7 +12,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -131,7 +130,7 @@ fun ViewUserProfileScreen(
                 title = { Text("Profile") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -188,7 +187,9 @@ fun ViewUserProfileScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.clickable {
                                 scope.launch {
-                                    followersList = userViewModel.getUsersByIds(viewedUser.followersList)
+                                    followersList = userViewModel.getUsersByIds(
+                                        viewedUser.followersList
+                                    )
                                     showFollowersDialog = true
                                 }
                             }
@@ -208,7 +209,9 @@ fun ViewUserProfileScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.clickable {
                                 scope.launch {
-                                    followingList = userViewModel.getUsersByIds(viewedUser.followingList)
+                                    followingList = userViewModel.getUsersByIds(
+                                        viewedUser.followingList
+                                    )
                                     showFollowingDialog = true
                                 }
                             }
@@ -240,7 +243,9 @@ fun ViewUserProfileScreen(
                     ) {
                         Text(
                             text = viewedUser.displayName.ifEmpty {
-                                if (viewedUser.firstName.isNotEmpty() || viewedUser.lastName.isNotEmpty()) {
+                                if (viewedUser.firstName.isNotEmpty()
+                                    || viewedUser.lastName.isNotEmpty())
+                                {
                                     "${viewedUser.firstName} ${viewedUser.lastName}".trim()
                                 } else {
                                     "Name"
@@ -324,7 +329,11 @@ fun ViewUserProfileScreen(
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
-                                    Text("Unfollow", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                                    Text(
+                                        "Unfollow",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
                                 }
                             } else {
                                 Button(
@@ -334,7 +343,11 @@ fun ViewUserProfileScreen(
                                     modifier = Modifier.weight(1f),
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
-                                    Text("Follow", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                                    Text(
+                                        "Follow",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
                                 }
                             }
                         }
@@ -380,7 +393,9 @@ fun ViewUserProfileScreen(
                             ProfileEventGridItem(
                                 event= event,
                                 onClick= {
-                                    navController.navigate("${Route.EventDetail.route}/${event.id}?readonly=true")
+                                    navController.navigate(
+                                        "${Route.EventDetail.route}/${event.id}?readonly=true"
+                                    )
                                 }
                             )
                         }

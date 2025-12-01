@@ -152,7 +152,9 @@ fun EventInfoDialog(
                                     color = Color.Black
                                 )
 
-                                val symbol = WeatherHelper.getWeatherSymbol(weatherData.condition.lowercase())
+                                val symbol = WeatherHelper.getWeatherSymbol(
+                                    weatherData.condition.lowercase()
+                                )
 
                                 Text(
                                     text = symbol,

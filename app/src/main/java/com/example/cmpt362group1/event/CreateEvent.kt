@@ -108,7 +108,6 @@ private fun EventFormFlow(
             is EventViewModel.EventUiState.Success -> {
                 if (!initialized) {
                     eventFormViewModel.loadFromEvent(state.event)
-                    initialized = true
                 }
             }
         }
@@ -120,7 +119,8 @@ private fun EventFormFlow(
     ) {
         composable(Route.CreateEventDetail.route) {
             CreateEventDetails(
-                isEditMode = isEditMode, // images are non-editable
+                // Images are non-editable
+                isEditMode = isEditMode,
                 eventFormViewModel = eventFormViewModel,
                 onExit = onExit,
                 onContinue = {
@@ -212,7 +212,7 @@ private fun processEventSubmission(
                 event,
                 onSuccess = { eventId ->
                     val uid = authViewModel.getUserId()
-                    if (uid != null && userViewModel != null) {
+                    if (uid != null) {
                         userViewModel.addJoinedEvent(uid, eventId)
                         userViewModel.addCreatedEvent(uid, eventId)
                     }
@@ -248,9 +248,9 @@ private fun processEventSubmission(
             context,
             ImageStoragePath.EventImage,
             onSuccess = { result ->
-                val url = result.uploadedUrl!! // legacy
+                val url = result.uploadedUrl!!
                 val urls = result.uploadedUrls
-                eventFormViewModel.updateImageUrl(url) // legacy
+                eventFormViewModel.updateImageUrl(url)
                 eventFormViewModel.updateImageUrls(urls)
 
                 Log.d("EventSubmission", "Image uploads success! URLS: ${result.uploadedUrls}")
