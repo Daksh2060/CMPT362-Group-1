@@ -118,6 +118,15 @@ fun ProfileView(
     authViewModel: AuthViewModel = viewModel(),
     userViewModel: UserViewModel = viewModel(),
 ) {
+    val colors = lightColorScheme(
+        background = Color.White,
+        surface = Color.White,
+        primary = Color.Black,
+        onSurface = Color.Black,
+        onSurfaceVariant = Color(0xFF666666),
+        outline = Color(0xFFDDDDDD)
+    )
+
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val currentUserId = remember { authViewModel.getUserId() }
@@ -143,254 +152,246 @@ fun ProfileView(
         }
     }
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-            .padding(16.dp)
+    MaterialTheme(colorScheme = colors) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White)
+                .padding(16.dp)
 
-    ) {
-        item {
-            Text(
-                text = userProfile.username.ifEmpty { "username" },
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                fontSize = 20.sp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            )
-        }
-
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(userProfile.photoUrl)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "Profile Picture",
-                    modifier = Modifier
-                        .size(86.dp)
-                        .clip(CircleShape)
-                        .border(1.dp, Color.LightGray, CircleShape)
-                )
-
-                Spacer(modifier = Modifier.width(24.dp))
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    modifier = Modifier.wrapContentWidth()
-                ) {
-                    StatBlock(label = "Events", value = userProfile.eventsJoined.size)
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.clickable {
-                            scope.launch {
-                                followersList = userViewModel.getUsersByIds(userProfile.followersList)
-                                showFollowersDialog = true
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = userProfile.followers.toString(),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Text(
-                            text = "Followers",
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
-                    }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.clickable {
-                            scope.launch {
-                                followingList = userViewModel.getUsersByIds(userProfile.followingList)
-                                showFollowingDialog = true
-                            }
-                        }
-                    ) {
-                        Text(
-                            text = userProfile.following.toString(),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp
-                        )
-                        Text(
-                            text = "Following",
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
-            }
-        }
-
-        item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = userProfile.displayName.ifEmpty {
-                            if (userProfile.firstName.isNotEmpty() || userProfile.lastName.isNotEmpty()) {
-                                "${userProfile.firstName} ${userProfile.lastName}".trim()
-                            } else {
-                                "Name"
-                            }
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        fontSize = 14.sp
-                    )
-
-                    if (userProfile.pronouns.isNotEmpty()) {
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = userProfile.pronouns,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Gray,
-                            fontSize = 14.sp
-                        )
-                    }
-                }
-            }
-        }
-
-        item {
-            if (userProfile.description.isNotEmpty()) {
+        ) {
+            item {
                 Text(
-                    text = userProfile.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontSize = 14.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                )
-            }
-        }
-
-        item {
-            if (userProfile.link.isNotEmpty()) {
-                Text(
-                    text = userProfile.link,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.primary,
+                    text = userProfile.username.ifEmpty { "username" },
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp)
-                        .clickable {
-                            val intent = Intent(Intent.ACTION_VIEW,
-                                if (!userProfile.link.startsWith("http://") &&
-                                    !userProfile.link.startsWith("https://")
-                                ) {
-                                    "https://${userProfile.link}"
-                                } else {
-                                    userProfile.link
-                                }.toUri())
-                            context.startActivity(intent)
-                        }
                 )
-            } else {
-                Spacer(modifier = Modifier.height(8.dp))
             }
-        }
 
-        item {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 24.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(
-                    onClick = { navController.navigate("edit_profile") },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text("Edit profile", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-                }
-            }
-        }
-
-        item {
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            Text(
-                text = "Events",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier= Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp)
-            )
-        }
-
-        item {
-            if (pastEvents.isEmpty()) {
-                Box(
+            item {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 32.dp),
-                    contentAlignment = Alignment.Center
+                        .padding(bottom = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "No events yet!",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(userProfile.photoUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Profile Picture",
+                        modifier = Modifier
+                            .size(86.dp)
+                            .clip(CircleShape)
+                            .border(1.dp, Color.LightGray, CircleShape)
                     )
-                }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                    verticalArrangement=Arrangement.spacedBy(2.dp),
-                    modifier = Modifier.height((pastEvents.size / 3 + 1) * 130.dp),
-                    userScrollEnabled = false
-                ) {
-                    items(pastEvents) { event ->
-                        ProfileEventGridItem(
-                            event = event,
-                            onClick = {
-                                mainNavController.navigate("${Route.EventDetail.route}/${event.id}?readonly=true")
+
+                    Spacer(modifier = Modifier.width(24.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(24.dp),
+                        modifier = Modifier.wrapContentWidth()
+                    ) {
+                        StatBlock(label = "Events", value = userProfile.eventsJoined.size)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.clickable {
+                                scope.launch {
+                                    followersList = userViewModel.getUsersByIds(userProfile.followersList)
+                                    showFollowersDialog = true
+                                }
                             }
-                        )
+                        ) {
+                            Text(
+                                text = userProfile.followers.toString(),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                            Text(
+                                text = "Followers",
+                                color = Color.Gray,
+                                fontSize = 14.sp
+                            )
+                        }
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.clickable {
+                                scope.launch {
+                                    followingList = userViewModel.getUsersByIds(userProfile.followingList)
+                                    showFollowingDialog = true
+                                }
+                            }
+                        ) {
+                            Text(
+                                text = userProfile.following.toString(),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp
+                            )
+                            Text(
+                                text = "Following",
+                                color = Color.Gray,
+                                fontSize = 14.sp
+                            )
+                        }
                     }
                 }
             }
-        }
 
-        item {
-            Spacer(modifier = Modifier.height(16.dp))
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                ) {
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = userProfile.displayName.ifEmpty {
+                                if (userProfile.firstName.isNotEmpty() || userProfile.lastName.isNotEmpty()) {
+                                    "${userProfile.firstName} ${userProfile.lastName}".trim()
+                                } else {
+                                    "Name"
+                                }
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 14.sp
+                        )
 
-            Button(
-                onClick = { authViewModel.signOut() },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
-                )
-            ) {
-                Text("Sign Out")
+                        if (userProfile.pronouns.isNotEmpty()) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = userProfile.pronouns,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray,
+                                fontSize = 14.sp
+                            )
+                        }
+                    }
+                }
             }
 
-            Button(
-                onClick = { authViewModel.deleteUser({}, {}) },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error
+            item {
+                if (userProfile.description.isNotEmpty()) {
+                    Text(
+                        text = userProfile.description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                    )
+                }
+            }
+
+            item {
+                if (userProfile.link.isNotEmpty()) {
+                    Text(
+                        text = userProfile.link,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                            .clickable {
+                                val intent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    if (!userProfile.link.startsWith("http://") &&
+                                        !userProfile.link.startsWith("https://")
+                                    ) {
+                                        "https://${userProfile.link}"
+                                    } else {
+                                        userProfile.link
+                                    }.toUri()
+                                )
+                                context.startActivity(intent)
+                            }
+                    )
+                } else {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    OutlinedButton(
+                        onClick = { navController.navigate("edit_profile") },
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Edit Profile", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                    }
+                }
+            }
+
+            item {
+                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                Text(
+                    text = "Events",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
                 )
-            ) {
-                Text("DEBUG: Delete User & Sign Out")
+            }
+
+            item {
+                if (pastEvents.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "No events yet!",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Gray
+                        )
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(3),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalArrangement=Arrangement.spacedBy(2.dp),
+                        modifier = Modifier.height((pastEvents.size / 3 + 1) * 130.dp),
+                        userScrollEnabled = false
+                    ) {
+                        items(pastEvents) { event ->
+                            ProfileEventGridItem(
+                                event = event,
+                                onClick = {
+                                    mainNavController.navigate("${Route.EventDetail.route}/${event.id}?readonly=true")
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedButton(
+                    onClick = { authViewModel.signOut() },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Sign Out", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                }
             }
         }
     }

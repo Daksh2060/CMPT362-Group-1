@@ -157,6 +157,16 @@ fun Event.startDateTime(): Date {
     }
 }
 
+fun Event.endDateTime(): Date {
+    return try {
+        val dateFormat = SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.US)
+        dateFormat.parse("$endDate $endTime") ?: Date(0)
+    } catch (e: Exception) {
+        Log.e("MapScreen", "Error parsing event date/time: $startDate $startTime", e)
+        Date(0)
+    }
+}
+
 @Composable
 fun InfoRow(label: String, value: String) {
     if (value.isNotEmpty()) {

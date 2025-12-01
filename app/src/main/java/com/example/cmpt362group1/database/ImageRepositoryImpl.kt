@@ -85,7 +85,7 @@ class ImageRepositoryImpl(
 
 private fun compressBitmap(bitmap: Bitmap): ByteArray {
     val outputStream = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.JPEG, 5, outputStream)
+    bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)
 
     val compressedBytes = outputStream.toByteArray()
 

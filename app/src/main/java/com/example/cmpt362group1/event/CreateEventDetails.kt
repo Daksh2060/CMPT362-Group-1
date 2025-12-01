@@ -54,6 +54,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.cmpt362group1.database.Event
+import com.example.cmpt362group1.navigation.explore.endDateTime
+import com.example.cmpt362group1.navigation.explore.startDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,11 +131,20 @@ fun EventForm(
                 eventFormViewModel.formInput.description.isNotBlank()
     }
 
+    fun validDate(): Boolean {
+        return eventFormViewModel.formInput.startDateTime() < eventFormViewModel.formInput.endDateTime()
+    }
+
     fun handleContinueOnClick() {
-        if (validForm()) {
+        if (validForm() && validDate()) {
             onContinue()
         } else {
-            val message = "Please fill in all required fields"
+            val message = if (!validForm()) {
+                "Please fill in all required fields"
+            } else {
+                "Start date must be before end date"
+            }
+
             Toast.makeText(context, message, Toast.LENGTH_LONG).show()
         }
     }
@@ -230,7 +241,8 @@ fun EventForm(
         item {
             Button(
                 onClick = { handleContinueOnClick() },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(8.dp)
             ) {
                 Text("Continue")
             }
