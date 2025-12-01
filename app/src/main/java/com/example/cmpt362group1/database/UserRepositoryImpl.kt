@@ -134,4 +134,60 @@ class UserRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun followUser(currentUserId: String, userToFollowId: String): Result<Unit> {
+        return try {
+            firestore.collection(USERS_COLLECTION)
+                .document(currentUserId)
+                .update(
+                    mapOf(
+                        "followingList" to FieldValue.arrayUnion(userToFollowId),
+                        "following" to FieldValue.increment(1)
+                    )
+                )
+                .await()
+
+            firestore.collection(USERS_COLLECTION)
+                .document(userToFollowId)
+                .update(
+                    mapOf(
+                        "followersList" to FieldValue.arrayUnion(currentUserId),
+                        "followers" to FieldValue.increment(1)
+                    )
+                )
+                .await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun unfollowUser(currentUserId: String, userToUnfollowId: String): Result<Unit> {
+        return try {
+            firestore.collection(USERS_COLLECTION)
+                .document(currentUserId)
+                .update(
+                    mapOf(
+                        "followingList" to FieldValue.arrayRemove(userToUnfollowId),
+                        "following" to FieldValue.increment(-1)
+                    )
+                )
+                .await()
+
+            firestore.collection(USERS_COLLECTION)
+                .document(userToUnfollowId)
+                .update(
+                    mapOf(
+                        "followersList" to FieldValue.arrayRemove(currentUserId),
+                        "followers" to FieldValue.increment(-1)
+                    )
+                )
+                .await()
+
+            Result.success(Unit)
+        } catch(e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

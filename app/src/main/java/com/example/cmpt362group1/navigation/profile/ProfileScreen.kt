@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.times
 import androidx.core.net.toUri
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cmpt362group1.Route
+import com.example.cmpt362group1.ui.dialogs.UserListDialog
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -70,20 +72,21 @@ fun ProfileScreen(
 
     LaunchedEffect(uid) {
         uid?.let {
-            userViewModel.loadUser(it) // from FB
+            userViewModel.loadUser(it)
+
         }
     }
 
     val userState by userViewModel.userState.collectAsState()
-    when (val state = userState) { // Not used yet?
+    when (val state = userState) {
         is UserUiState.Loading -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
             return
         }
-        is UserUiState.Error -> { return } // later
-        UserUiState.Idle -> { return } // later
+        is UserUiState.Error -> { return }
+        UserUiState.Idle -> { return }
         is UserUiState.Success -> {}
     }
 
@@ -109,15 +112,23 @@ fun ProfileScreen(
 @Composable
 fun ProfileView(
     navController: NavHostController,
-    mainNavController: NavHostController, // for event details
+    mainNavController: NavHostController,
     userProfile: User,
     eventViewModel: EventViewModel = viewModel(),
     authViewModel: AuthViewModel = viewModel(),
+    userViewModel: UserViewModel = viewModel(),
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val currentUserId = remember { authViewModel.getUserId() }
+
+    var showFollowersDialog by remember { mutableStateOf(false) }
+    var showFollowingDialog by remember { mutableStateOf(false) }
+    var followersList by remember { mutableStateOf<List<User>>(emptyList()) }
+    var followingList by remember { mutableStateOf<List<User>>(emptyList()) }
+
     val pastEventsIds = userProfile.eventsJoined
 
-    // load events
     val eventsState by eventViewModel.eventsState.collectAsState()
     val pastEvents = remember(eventsState,pastEventsIds) {
         when (eventsState) {
@@ -176,8 +187,46 @@ fun ProfileView(
                     modifier = Modifier.wrapContentWidth()
                 ) {
                     StatBlock(label = "Events", value = userProfile.eventsJoined.size)
-                    StatBlock(label = "Followers", value = userProfile.followers)
-                    StatBlock(label = "Following", value = userProfile.following)
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.clickable {
+                            scope.launch {
+                                followersList = userViewModel.getUsersByIds(userProfile.followersList)
+                                showFollowersDialog = true
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = userProfile.followers.toString(),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            text = "Followers",
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    }
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.clickable {
+                            scope.launch {
+                                followingList = userViewModel.getUsersByIds(userProfile.followingList)
+                                showFollowingDialog = true
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = userProfile.following.toString(),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            text = "Following",
+                            color = Color.Gray,
+                            fontSize = 14.sp
+                        )
+                    }
                 }
             }
         }
@@ -287,7 +336,6 @@ fun ProfileView(
             )
         }
 
-        // grid for events
         item {
             if (pastEvents.isEmpty()) {
                 Box(
@@ -344,6 +392,60 @@ fun ProfileView(
             ) {
                 Text("DEBUG: Delete User & Sign Out")
             }
+        }
+    }
+
+    if (showFollowersDialog) {
+        currentUserId?.let { currentUid ->
+            UserListDialog(
+                title = "Followers",
+                users = followersList,
+                currentUserId = currentUid,
+                onDismiss = { showFollowersDialog = false },
+                onUserClick = { clickedUserId ->
+                    showFollowersDialog = false
+                    if (clickedUserId != currentUid) {
+                        mainNavController.navigate("${Route.ViewUserProfile.route}/$clickedUserId")
+                    }
+                },
+                onFollowClick = { userToFollowId ->
+                    userViewModel.followUser(currentUid, userToFollowId)
+                },
+                onUnfollowClick = { userToUnfollowId ->
+                    userViewModel.unfollowUser(currentUid, userToUnfollowId)
+                },
+                isFollowingUser = { checkUserId ->
+                    userProfile.followingList.contains(checkUserId)
+                },
+                showFollowButton = true
+            )
+        }
+    }
+
+    if (showFollowingDialog) {
+        currentUserId?.let { currentUid ->
+            UserListDialog(
+                title = "Following",
+                users = followingList,
+                currentUserId = currentUid,
+                onDismiss = { showFollowingDialog = false },
+                onUserClick = { clickedUserId ->
+                    showFollowingDialog = false
+                    if (clickedUserId != currentUid) {
+                        mainNavController.navigate("${Route.ViewUserProfile.route}/$clickedUserId")
+                    }
+                },
+                onFollowClick = { userToFollowId ->
+                    userViewModel.followUser(currentUid, userToFollowId)
+                },
+                onUnfollowClick = { userToUnfollowId ->
+                    userViewModel.unfollowUser(currentUid, userToUnfollowId)
+                },
+                isFollowingUser = { checkUserId ->
+                    userProfile.followingList.contains(checkUserId)
+                },
+                showFollowButton = true
+            )
         }
     }
 }
