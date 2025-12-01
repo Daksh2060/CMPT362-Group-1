@@ -13,11 +13,12 @@ The **SFU Campus Event Explorer** makes planning and discovering on-campus event
 
 ##### Webpage: https://delicia0314.wixsite.com/campus-event-explore
 
+##### GitHub Repo: https://github.com/Daksh2060/CMPT362-Group-1
 ---
 
 ## Setup & Build Instructions
 
-1. Clone the repository or download ZIP from webpage:
+1. Clone the repository or download ZIP from webpage (linked above):
 
    ```bash
    git clone <repo-url>
@@ -29,9 +30,8 @@ The **SFU Campus Event Explorer** makes planning and discovering on-campus event
    sdk.dir=/path/to/your/Android/sdk
    MAPS_API_KEY=your_google_maps_api_key
    ```
-3. Open the project in Android Studio.
-
-4. Build and run on an emulator or device.
+   
+3. Build and run.
 
 ---
 
@@ -66,3 +66,18 @@ The **SFU Campus Event Explorer** makes planning and discovering on-campus event
 - Event weather report
 
 ---
+
+## AI Usage
+
+- Used Claude to help design the GridView for a social media-like profile page.
+
+- Used Claude to resolve a bug in the planner search bar, where the planner would appear empty on an empty search.
+
+- Used ChatGPT to assign public weather codes to human-readable weather notices.
+
+- Used ChatGPT to help design a scrollable column within the event Dialogbox.
+
+- Used ChatGPT to highlight selected location within the event explorer.
+
+- Used ChatGPT to add a title overlay to images in the profile page.
+
