@@ -18,11 +18,8 @@ class WeatherRepository {
         onSuccess: (WeatherResult) -> Unit,
         onError: (String) -> Unit
     ) {
-        RetrofitInstance.api.getWeather(latitude, longitude)
-            .enqueue(object : Callback<WeatherResponse> {
-            override fun onResponse(
-                call: Call<WeatherResponse>, response: Response<WeatherResponse>
-            ) {
+        RetrofitInstance.api.getWeather(latitude, longitude).enqueue(object : Callback<WeatherResponse> {
+            override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>) {
                 if (!response.isSuccessful) {
                     onError("HTTP Error: ${response.code()}")
                     return
@@ -37,15 +34,12 @@ class WeatherRepository {
                 val hourly = weather.hourly
                 val index = hourly.time.indexOf(dateTime)
 
-                if (index < 0
-                    || index >= hourly.temperature2m.size
-                    || index >= hourly.weathercode.size)
-                {
+                if (index < 0 || index >= hourly.temperature_2m.size || index >= hourly.weathercode.size) {
                     onError("Check again closer to start date.")
                     return
                 }
 
-                val temp = hourly.temperature2m[index]
+                val temp = hourly.temperature_2m[index]
                 val condition = weatherCodeToString(hourly.weathercode[index])
                 onSuccess(WeatherResult(temp, condition))
             }
