@@ -9,15 +9,29 @@ import com.example.cmpt362group1.database.Event
 import com.example.cmpt362group1.navigation.explore.formatDateTimeForWeatherApi
 import com.example.cmpt362group1.navigation.explore.weather.WeatherRepository
 import com.example.cmpt362group1.navigation.explore.weather.WeatherResult
+import androidx.core.content.edit
+import com.example.cmpt362group1.navigation.explore.startDateTime
+import java.util.Date
 
 object WidgetUpdater {
     fun updateWidget(context: Context, events: List<Event>) {
         Log.d("INFO WIDGET", "Update widget with event list length: ${events.size}")
         val weatherRepository = WeatherRepository()
 
+        val prefs = context.getSharedPreferences("widget_data", Context.MODE_PRIVATE)
+        prefs.edit { clear() } // delete old data
+
         events
             .filter { it ->
-                it.latitude != null && it.longitude != null && it.startDate.isNotEmpty()
+                it.latitude != null &&
+                        it.longitude != null &&
+                        it.startDate.isNotEmpty() &&
+                        it.startDateTime().after(
+                            Date()
+                        )
+            }
+            .sortedBy { it ->
+                it.startDateTime()
             }
             .take(3)
             .forEach { event ->
