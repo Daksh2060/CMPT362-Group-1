@@ -37,7 +37,7 @@ fun DatePickerField(
 
     OutlinedTextField(
         value = selectedDate,
-        label = { Text(label) }, //NOP
+        label = { Text(label) },
         singleLine = true,
         readOnly = true,
         onValueChange = {},

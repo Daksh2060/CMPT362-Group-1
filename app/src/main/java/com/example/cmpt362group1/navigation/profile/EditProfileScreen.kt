@@ -117,7 +117,11 @@ fun EditProfileScreen(
                             navController.popBackStack()
                         }
                     ) {
-                        Text("Done", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                        Text(
+                            "Done",
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             )
@@ -159,7 +163,9 @@ fun EditProfileScreen(
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.clickable {
                         photoPicker.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            PickVisualMediaRequest(
+                                ActivityResultContracts.PickVisualMedia.ImageOnly
+                            )
                         )
                     }
                 )
@@ -286,14 +292,22 @@ fun EditProfileScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column(Modifier.weight(1f)) {
-                            Text(link, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
+                            Text(
+                                link,
+                                fontSize = 14.sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         }
                         Row {
                             TextButton(onClick = { showLinkDialog = true }) {
                                 Text("Edit", fontSize = 12.sp)
                             }
                             TextButton(onClick = { link = "" }) {
-                                Text("Remove", fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
+                                Text(
+                                    "Remove",
+                                    fontSize = 12.sp,
+                                    color = MaterialTheme.colorScheme.error
+                                )
                             }
                         }
                     }

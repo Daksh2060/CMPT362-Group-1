@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 fun LoadingScreen(
     message: String = "Processing...",
     subMessage: String? = null,
-    progress: Int? = null // Optional progress percentage
+    progress: Int? = null
 ) {
     Box(
         modifier = Modifier

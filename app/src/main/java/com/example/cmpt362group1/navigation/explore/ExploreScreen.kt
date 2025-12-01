@@ -1,17 +1,13 @@
 package com.example.cmpt362group1.navigation.explore
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -20,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,10 +23,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cmpt362group1.database.Event
 import com.example.cmpt362group1.database.EventViewModel
-import com.example.cmpt362group1.database.UserViewModel
 import com.example.cmpt362group1.widget.WidgetUpdater
 import com.google.android.gms.maps.model.LatLng
-
 
 @Composable
 fun MapStateHolder(
@@ -46,7 +39,6 @@ fun MapStateHolder(
     )
 
     val context = LocalContext.current
-
     val cityNames = sfuLocations.map { it.name }
     val initialLocation = sfuLocations.first()
     var selectedLocation by remember { mutableStateOf(initialLocation) }
@@ -59,10 +51,8 @@ fun MapStateHolder(
     }
 
     LaunchedEffect(events) {
-        WidgetUpdater.updateWidget(context, events) // push updates for widget
+        WidgetUpdater.updateWidget(context, events)
     }
-
-    Log.d("MapStateHolder INFO", "Read events: $events")
 
     Box(modifier = Modifier.fillMaxSize()) {
         MapScreen(
@@ -71,7 +61,6 @@ fun MapStateHolder(
             modifier = Modifier.fillMaxWidth(),
             onEventSelected = onEventSelected
         )
-
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -160,7 +149,6 @@ fun SegmentFloatingBar(
                             .height(32.dp)
                             .background(Color(0xFFE9E9E9))
                     )
-
                 }
             }
         }

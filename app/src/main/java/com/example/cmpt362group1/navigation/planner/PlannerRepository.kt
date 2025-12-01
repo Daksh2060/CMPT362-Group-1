@@ -9,7 +9,6 @@ import com.example.cmpt362group1.database.UserRepositoryImpl
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -36,7 +35,7 @@ class FirestorePlannerRepository(
         return userRepository
             .getUser(uid)
             .flatMapLatest { user ->
-                val joinedIds = user?.eventsJoined ?: emptyList<String>()
+                val joinedIds = user?.eventsJoined ?: emptyList()
                 Log.d(
                     "PlannerDebug",
                     "User ${user?.id} joinedIds = $joinedIds"
@@ -66,17 +65,4 @@ class FirestorePlannerRepository(
                     }
             }
     }
-}
-
-class FakePlannerRepository : PlannerRepository {
-    private val state = MutableStateFlow(emptyList<Event>())
-
-    override fun streamEvents(query: String?): Flow<List<Event>> =
-        state.map { list ->
-            if (query.isNullOrBlank()) list
-            else list.filter { e ->
-                e.title.contains(query, ignoreCase = true) ||
-                        e.location.contains(query, ignoreCase = true)
-            }
-        }
 }

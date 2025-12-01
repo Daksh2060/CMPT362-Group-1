@@ -106,7 +106,7 @@ fun UserListDialog(
 @Composable
 fun UserListItem(
     user: User,
-    currentUserId: String, // TBC
+    currentUserId: String,
     onUserClick: () -> Unit,
     onFollowClick: (() -> Unit)?,
     onUnfollowClick: (() -> Unit)?,

@@ -21,9 +21,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -132,7 +129,8 @@ fun EventForm(
     }
 
     fun validDate(): Boolean {
-        return eventFormViewModel.formInput.startDateTime() < eventFormViewModel.formInput.endDateTime()
+        return eventFormViewModel.formInput.startDateTime() <
+                eventFormViewModel.formInput.endDateTime()
     }
 
     fun handleContinueOnClick() {
@@ -253,7 +251,9 @@ fun EventForm(
 @Composable
 fun ImageSelector(eventFormViewModel: EventFormViewModel) {
     val photoPicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = EventFormViewModel.MAX_IMAGE_UPLOAD)
+        contract = ActivityResultContracts.PickMultipleVisualMedia(
+            maxItems = EventFormViewModel.MAX_IMAGE_UPLOAD
+        )
     ) { uris: List<Uri> ->
         eventFormViewModel.updateImageUris(uris)
     }
@@ -262,7 +262,7 @@ fun ImageSelector(eventFormViewModel: EventFormViewModel) {
 
     fun launchPhotoPicker() {
         if (eventFormViewModel.imageUris.size == EventFormViewModel.MAX_IMAGE_UPLOAD) {
-            Toast.makeText(context, "You already have three images selected!", 2000)
+            Toast.makeText(context, "Max of three images!", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -277,7 +277,6 @@ fun ImageSelector(eventFormViewModel: EventFormViewModel) {
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // add images placeholder
         Box(
             modifier = Modifier
                 .fillMaxWidth()

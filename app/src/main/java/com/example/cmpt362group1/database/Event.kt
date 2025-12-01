@@ -24,7 +24,7 @@ data class Event(
     val latitude: Double? = null,
     val longitude: Double? = null,
 
-    val imageUrl: String = "", // legacy
+    val imageUrl: String = "",
     val imageUrls: ArrayList<String> = arrayListOf(),
 
     val bannedUserIds: List<String> = emptyList()

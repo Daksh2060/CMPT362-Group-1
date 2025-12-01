@@ -1,25 +1,22 @@
 package com.example.cmpt362group1.navigation.explore
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
 import com.example.cmpt362group1.R
 import com.example.cmpt362group1.database.Event
 import com.example.cmpt362group1.navigation.explore.weather.WeatherRepository
 import com.example.cmpt362group1.navigation.explore.weather.WeatherResult
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.GoogleMap
@@ -27,11 +24,11 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.core.graphics.scale
 
+@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun MapScreen(
     selectedLocation: CampusLocation,
@@ -51,10 +48,12 @@ fun MapScreen(
     )
 
     val cameraPositionState = rememberCameraPositionState()
-
     LaunchedEffect(selectedLocation) {
         cameraPositionState.animate(
-            update = CameraUpdateFactory.newLatLngZoom(selectedLocation.latLng, selectedLocation.zoom),
+            update = CameraUpdateFactory.newLatLngZoom(
+                selectedLocation.latLng,
+                selectedLocation.zoom
+            ),
             durationMs = 500
         )
     }
@@ -65,12 +64,7 @@ fun MapScreen(
             minZoomPreference = 10.0f
         )
     }
-
-
     val futureEvents = events.filter { it.startDateTime() > Date() }
-
-    Log.d("MapScreen INFO", "Drawing future events: $futureEvents")
-
     val markerBitmap = remember {
         try {
             val bitmap = android.graphics.BitmapFactory.decodeResource(

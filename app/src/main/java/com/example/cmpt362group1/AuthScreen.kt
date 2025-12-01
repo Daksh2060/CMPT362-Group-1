@@ -12,17 +12,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.cmpt362group1.auth.AuthState
 import com.example.cmpt362group1.auth.AuthViewModel
 import com.example.cmpt362group1.auth.LoginScreen
-import com.example.cmpt362group1.database.EventViewModel
-import com.example.cmpt362group1.database.UserViewModel
 
 @Composable
 fun AuthScreen(
     authViewModel: AuthViewModel = viewModel(),
 ) {
-    // will toggle screens depending on authentication status
     val authState by authViewModel.authState.collectAsState()
 
-    when (val state = authState) {
+    when (authState) {
         is AuthState.Loading -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -32,16 +29,12 @@ fun AuthScreen(
             }
         }
 
-        // show login screen (default)
         is AuthState.Unauthenticated -> {
             LoginScreen(
                 onLoginSuccess = {
-                    // auth state will automatically update via listener
                 }
             )
         }
-
-        // only show main screen once user is authenticated
         is AuthState.Authenticated -> {
             MainScreen()
         }

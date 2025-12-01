@@ -2,7 +2,6 @@ package com.example.cmpt362group1.navigation.planner
 
 import com.example.cmpt362group1.database.Event
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -26,7 +25,7 @@ object EventGrouping {
         return try {
             if (raw.isBlank()) LocalDate.now()
             else LocalDate.parse(raw, DATE)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             LocalDate.now()
         }
     }
@@ -35,7 +34,7 @@ object EventGrouping {
         return try {
             if (raw.isBlank()) LocalTime.MIDNIGHT
             else LocalTime.parse(raw, TIME)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             LocalTime.MIDNIGHT
         }
     }

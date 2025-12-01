@@ -15,7 +15,6 @@ class AuthViewModel(
     private val userViewModel: UserViewModel = UserViewModel()
 ): ViewModel() {
     private val auth = FirebaseAuth.getInstance()
-
     private val _authState = MutableStateFlow<AuthState>(AuthState.Loading)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
@@ -29,7 +28,6 @@ class AuthViewModel(
                 if (authResult.additionalUserInfo?.isNewUser == true) {
                     createUserInFirestore(user, onSuccess, onError)
                 }
-
                 onSuccess()
             }
             .addOnFailureListener { exception ->
@@ -80,14 +78,11 @@ class AuthViewModel(
         onError: (String) -> Unit
     ) {
         val uid = user.uid
-
-        // firestore
         FirebaseFirestore.getInstance()
             .collection("users")
             .document(uid)
             .delete()
             .addOnSuccessListener {
-                // auth
                 user.delete()
                     .addOnSuccessListener { onSuccess() }
                     .addOnFailureListener { e -> onError(e.message ?: "Failed to delete user") }

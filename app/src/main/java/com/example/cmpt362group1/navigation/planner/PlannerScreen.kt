@@ -183,7 +183,8 @@ private fun PlannerScreenContent(
                                     location = ew.event.location,
                                     time = ew.startTime.toString(),
                                     createdBy = ew.event.createdBy,
-                                    currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+                                    currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+                                        ?: "",
                                     onClick = { onEventClick(ew.event.id) }
                                 )
                                 Spacer(Modifier.height(10.dp))
@@ -195,8 +196,6 @@ private fun PlannerScreenContent(
         }
     }
 }
-
-
 
 @Composable
 private fun EventRow(
@@ -262,7 +261,6 @@ private fun EventRow(
                     )
                 }
             }
-
         }
     }
 }

@@ -30,9 +30,9 @@ class ImageRepositoryImpl(
             val filename = "${UUID.randomUUID()}.jpg"
             val storageRef: StorageReference = storage.reference.child("${path.path}/$filename")
 
-            storageRef.putBytes(compressedBytes).await() // upload to fb
+            storageRef.putBytes(compressedBytes).await()
 
-            val downloadUrl = storageRef.downloadUrl.await().toString() // get url from fb
+            val downloadUrl = storageRef.downloadUrl.await().toString()
             ImageUploadResult.Success(downloadUrl)
         } catch (e: Exception) {
             ImageUploadResult.Error(e.message ?: "Error uploading image in repository!")

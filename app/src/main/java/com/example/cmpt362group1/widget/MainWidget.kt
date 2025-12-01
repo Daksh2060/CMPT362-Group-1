@@ -20,7 +20,11 @@ class MainWidget : AppWidgetProvider() {
         const val ACTION_REFRESH = "com.cmpt362group1.WIDGET_REFRESH"
     }
 
-    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: AppWidgetManager,
+        appWidgetIds: IntArray)
+    {
         for (id in appWidgetIds) {
             updateWidget(context, appWidgetManager, id)
         }
@@ -40,7 +44,6 @@ class MainWidget : AppWidgetProvider() {
     private fun updateWidget(context: Context, appWidgetManager: AppWidgetManager, id: Int) {
         val views = RemoteViews(context.packageName, R.layout.main_widget)
 
-        // ===== REFRESH BUTTON =====
         val refreshIntent = Intent(context, MainWidget::class.java).apply {
             action = ACTION_REFRESH
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
@@ -55,7 +58,6 @@ class MainWidget : AppWidgetProvider() {
 
         views.setOnClickPendingIntent(R.id.refresh_button, refreshPending)
 
-        // ===== TAP TO OPEN APP =====
         val openAppIntent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
@@ -67,16 +69,13 @@ class MainWidget : AppWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Make the entire content area clickable to open app
         views.setOnClickPendingIntent(R.id.widget_content_area, openAppPending)
         views.setOnClickPendingIntent(R.id.widget_events, openAppPending)
 
-        // ===== LOAD EVENT DATA =====
         val prefs = context.getSharedPreferences("widget_data", Context.MODE_PRIVATE)
         val events = prefs.getStringSet("events", emptySet()) ?: emptySet()
         val lastUpdated = prefs.getLong("last_updated", 0)
 
-        // Set events text
         val displayText = if (events.isEmpty()) {
             "No upcoming events\n\nTap to view your calendar"
         } else {
@@ -84,7 +83,6 @@ class MainWidget : AppWidgetProvider() {
         }
         views.setTextViewText(R.id.widget_events, displayText)
 
-        // Set last updated timestamp
         val lastUpdatedText = if (lastUpdated > 0) {
             val formatter = SimpleDateFormat("MMM d, h:mm a", Locale.getDefault())
             "Updated ${formatter.format(Date(lastUpdated))}"
@@ -108,7 +106,6 @@ class MainWidget : AppWidgetProvider() {
                     val weather = parts[4]
                     val temp = parts[5]
 
-                    // Event title - bold effect via caps or emphasis
                     append("📌 $title")
 
                     // Location

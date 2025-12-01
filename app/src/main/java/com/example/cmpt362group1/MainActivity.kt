@@ -19,12 +19,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         val eventRepository: EventRepository = EventRepositoryImpl()
-        val eventViewModel = EventViewModel(eventRepository)
+        EventViewModel(eventRepository)
 
         val userRepository: UserRepository = UserRepositoryImpl()
         val userViewModel = UserViewModel(userRepository)
-
-        val authViewModel = AuthViewModel(userViewModel = userViewModel)
+        AuthViewModel(userViewModel = userViewModel)
 
         setContent {
             MaterialTheme {

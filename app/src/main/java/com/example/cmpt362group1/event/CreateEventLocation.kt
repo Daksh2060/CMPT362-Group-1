@@ -1,5 +1,6 @@
 package com.example.cmpt362group1.event
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -26,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,7 +50,6 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 val PRESET_LOCATIONS = listOf(
@@ -68,13 +69,14 @@ fun CreateEventLocation(
     onConfirm: (Double, Double) -> Unit,
     eventFormViewModel: EventFormViewModel,
 ) {
-    val initialLocation = eventFormViewModel.formInput.latitude to eventFormViewModel.formInput.longitude
+    val initialLocation =
+        eventFormViewModel.formInput.latitude to eventFormViewModel.formInput.longitude
 
     var selectedLat by remember {
-        mutableStateOf(initialLocation.first ?: 49.25)
+        mutableDoubleStateOf(initialLocation.first ?: 49.25)
     }
     var selectedLng by remember {
-        mutableStateOf(initialLocation.second ?: -123.0)
+        mutableDoubleStateOf(initialLocation.second ?: -123.0)
     }
 
     Scaffold(
@@ -123,6 +125,7 @@ fun CreateEventLocation(
     }
 }
 
+@SuppressLint("LocalContextResourcesRead")
 @Composable
 fun LocationPicker(
     modifier: Modifier = Modifier,
@@ -132,7 +135,7 @@ fun LocationPicker(
     val context: Context = LocalContext.current
 
     var markerState by remember { mutableStateOf(MarkerState(position = currentLocation)) }
-    LaunchedEffect(markerState.position) { // observe marker position changes from dragging
+    LaunchedEffect(markerState.position) {
         snapshotFlow { markerState.position }
             .collect { position ->
                 if (position != currentLocation) {
