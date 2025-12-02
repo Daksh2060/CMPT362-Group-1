@@ -69,15 +69,25 @@ The **SFU Campus Event Explorer** makes planning and discovering on-campus event
 
 ## AI Usage
 
-- Used Claude to help design the GridView for a social media-like profile page.
+Utilized Claude:
 
-- Used Claude to resolve a bug in the planner search bar, where the planner would appear empty on an empty search.
+- To learn MVVM architecture implementation by studying example code for ProfileViewModel and ProfileRepository integration with Firestore.
 
-- Used ChatGPT to assign public weather codes to human-readable weather notices.
+- To understand LazyVerticalGrid implementation with custom styling for creating Instagram-style multi-column layouts.
 
-- Used ChatGPT to help design a scrollable column within the event Dialogbox.
+- To learn techniques for overlaying text on images with gradient backgrounds for better readability in Compose.
 
-- Used ChatGPT to highlight selected location within the event explorer.
+- To study implementation patterns for loading, success, and error states in Jetpack Compose UI components.
 
-- Used ChatGPT to add a title overlay to images in the profile page.
+- To resolve a bug in the planner search bar, where the planner would appear empty on an empty search.
+
+Utilized ChatGPT:
+
+- To assign public weather codes to human-readable weather notices:
+
+- To help design a scrollable column within the event Dialogbox.
+
+- To highlight selected location within the event explorer.
+
+- To add a title overlay to images in the profile page.
 
